@@ -14,6 +14,8 @@ model Book {
   author         String
   published_year Int
   bookIsbns      BookIsbn[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime  @updatedAt
   
   @@unique([title, author, published_year])
   @@index([author, title])
@@ -21,10 +23,12 @@ model Book {
 
 model BookIsbn {
   id      String    @id @default(uuid())
-  bookId  Int
+  bookId  String
   isbn    String @unique
   book    Book   @relation(fields: [bookId], references: [id])
   loans   Loan[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime  @updatedAt
 }
 
 model User {
@@ -34,12 +38,19 @@ model User {
   phoneNumber String @unique
   NIN   Int    @unique
   loans Loan[]
+  isActive  Boolean @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime  @updatedAt
+  @@index([name])
 }
 
 model Loan {
   id        String       @id @default(uuid())
-  isbnId    Int
-  userId    Int
+  isbnId    String
+  userId    String
+  bookTitle    String
+  bookAuthor String
+  bookYear  Int
   loanDate  DateTime  @default(now())
   dueDate   DateTime?
   returnDate DateTime?
