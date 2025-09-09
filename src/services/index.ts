@@ -1,5 +1,7 @@
-import { BookService } from "./bookServices";
+import { BookService } from "./bookService";
+import { UserService } from "./userService";
 
 export const services = {
-    books: new BookService()
+    books: new BookService(),
+    users: new UserService(),
 }
