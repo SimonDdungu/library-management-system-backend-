@@ -1,7 +1,7 @@
 import prisma from "../database/model"
 
 class BookService{
-    async get(){
+    async getAllBooks(){
         try{
             return await prisma.book.findMany({
                 include: { bookIsbns: true },
@@ -11,7 +11,7 @@ class BookService{
         }
     }
 
-    async create(title: string, author: string, publish_year: number, isbn: string){
+    async createBook(title: string, author: string, publish_year: number, isbn: string){
         try {
             await prisma.book.create({data: {title: title, author: author, published_year: publish_year, bookIsbns: {create: {isbn: isbn}}}})
         } catch (err) {
@@ -39,7 +39,7 @@ class BookService{
         try {
            return await prisma.book.findMany({
                 where: {
-                   title: title
+                   title: {contains: title, mode: "insensitive"}
                 },
                 include: { bookIsbns: true },
             });
@@ -52,7 +52,7 @@ class BookService{
         try {
            return await prisma.book.findMany({
                 where: {
-                   author: author
+                   author: {contains: author, mode: "insensitive"}
                 },
                 include: { bookIsbns: true },
             });
@@ -64,13 +64,42 @@ class BookService{
     async findByYear(year: number) {
         try {
             return prisma.book.findMany({
-            where: { published_year: year },
-            include: { bookIsbns: true },
-        });
+                where: { published_year: year },
+                include: { bookIsbns: true },
+            });
         } catch (err) {
             throw new Error("Failed to filter book years: " + (err as Error).message);
         }
-        
+    }
+
+    async updateOneBook(id: string, title: string, author: string, published_year: number, isbnId: string, newIsbn: string) {
+        try {
+            await prisma.book.update({
+            where: { id: id },
+            data: {
+                title: title,
+                author: author,
+                published_year: published_year,
+                bookIsbns: {
+                    update: {
+                        where: { id: isbnId }, 
+                        data: { isbn: newIsbn },
+                    },
+                },
+            }})
+        } catch (err) {
+        throw new Error("Failed to update book: " + (err as Error).message);
+        }
+    }
+
+    async deleteOneBook(id: string) {
+        try {
+            await prisma.book.delete({
+                where: { id },
+            });
+        } catch (err) {
+            throw new Error("Failed to delete book: " + (err as Error).message);
+        }
     }
 
 
