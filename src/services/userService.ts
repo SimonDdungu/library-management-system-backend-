@@ -1,4 +1,5 @@
 import prisma from "../database/model";
+import _ from "lodash";
 
 class UserService{
     async getAllUsers(){
@@ -13,7 +14,7 @@ class UserService{
 
     async createUser(name: string, email: string, phoneNumber: string, NIN: number){
         try {
-            await prisma.user.create({data: {name: name, email: email.toLowerCase(), phoneNumber: phoneNumber, NIN: NIN}})
+            await prisma.user.create({data: {name: _.startCase(_.toLower(name)), email: email.toLowerCase(), phoneNumber: phoneNumber, NIN: NIN}})
         } catch (err) {
             throw new Error("Failed to create user: " + (err as Error).message)
         }
