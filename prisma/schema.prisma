@@ -54,6 +54,7 @@ model Loan {
   loanDate  DateTime  @default(now())
   dueDate   DateTime?
   returnDate DateTime?
+  Cleared    Boolean   @default(false)
   updatedAt DateTime  @updatedAt
   bookIsbn  BookIsbn  @relation(fields: [isbnId], references: [id])
   user      User      @relation(fields: [userId], references: [id])

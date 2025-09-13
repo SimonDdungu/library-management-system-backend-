@@ -3,39 +3,73 @@ import _ from "lodash";
 
 const limit = 20
 
-
-class BookService{
-   
-    async getAllBooks(page: number, sortBy: string = "createdAt", order: "asc" | "desc" = "desc"){
+class LoanService {
+     async getAllLoans(page: number, sortBy: string = "createdAt", order: "asc" | "desc" = "desc"){
         try{
-            const [books, totalRecords] = await Promise.all([ 
-                prisma.book.findMany({
+            const [loans, totalRecords] = await Promise.all([ 
+                prisma.loan.findMany({
                     skip: (page - 1) * limit,
                     take: limit,
                     orderBy: { [sortBy] : order },
-                    include: { bookIsbns: true },
+                    include: { bookIsbn: true, user: true },
                 }),
-                prisma.book.count()
+                prisma.loan.count()
             ])
 
             const totalPages = Math.ceil(totalRecords / limit);
 
-            return { data: books, totalRecords, totalPages,  page };
+            return { data: loans, totalRecords, totalPages,  page };
 
         }catch (err){
-            throw new Error("Failed to fetch books: " + (err as Error).message);
+            throw new Error("Failed to fetch loans: " + (err as Error).message);
         }
     }
 
-    async createBook(title: string, author: string, publish_year: number, isbn: string){
+    async createLoan(userId: string, isbnId: string, dueDate: Date){
         try {
-            await prisma.book.create({data: {title: title, author: _.startCase(_.toLower(author)), published_year: publish_year, bookIsbns: {create: {isbn: isbn}}}})
+            //Does User exist?
+            const user = await prisma.user.findUnique({ where: { id: userId } });
+            if (!user || !user.isActive) {
+            throw new Error("User does not exist");
+            }
+
+            //Is book taken by another customer?
+            const activeLoan = await prisma.loan.findFirst({
+                where: { isbnId: isbnId, returnDate: null },
+            });
+            if (activeLoan) {
+               throw new Error("This book copy is already loaned out");
+            }
+
+            const bookDetails = await prisma.bookIsbn.findUnique({
+                where: { id: isbnId },
+                include: { book: true },
+            });
+
+            if (!bookDetails) {
+                throw new Error("Book details not found");
+            }
+
+
+
+            return await prisma.loan.create({
+                data: 
+                {
+                    userId: userId, 
+                    isbnId: isbnId, 
+                    dueDate: dueDate, 
+                    bookTitle: bookDetails.book.title,
+                    bookAuthor: bookDetails.book.author,
+                    bookYear: bookDetails.book.published_year
+                }});
+
+
         } catch (err) {
-            throw new Error("Failed to create books: " + (err as Error).message)
+            throw new Error("Failed to create loan: " + (err as Error).message)
         }
     }
 
-    async findBooks(query: string, page: number = 1,  sortBy: string = "createdAt", order: "asc" | "desc" = "desc") {
+    async findLoan(query: string, page: number = 1,  sortBy: string = "createdAt", order: "asc" | "desc" = "desc") {
         try {
            const [books, totalRecords] = await Promise.all([ 
                 prisma.book.findMany({
@@ -150,20 +184,6 @@ class BookService{
         }
     }
 
-    async findByISBN(isbn: string) {
-        try {
-            const ISBN = await prisma.bookIsbn.findMany({
-                    where: { isbn: {contains: isbn, mode: "insensitive"} },
-                    include: { book: true },
-                })
-
-            return { data: ISBN};
-            
-        } catch (err) {
-            throw new Error("Failed to filter book years: " + (err as Error).message);
-        }
-    }
-
     async updateOneBook(id: string, title: string, author: string, published_year: number, isbnId: string, newIsbn: string) {
         try {
             await prisma.book.update({
@@ -197,4 +217,4 @@ class BookService{
 
 }
 
-export {BookService}
+export {LoanService}
