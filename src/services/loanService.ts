@@ -25,7 +25,7 @@ class LoanService {
         }
     }
 
-    async createLoan(userId: string, isbnId: string, dueDate: Date){
+    async createLoan(userId: string, isbn: string, dueDate: Date){
         try {
             //Does User exist?
             const user = await prisma.user.findUnique({ where: { id: userId } });
@@ -34,18 +34,20 @@ class LoanService {
             }
 
             //Is book taken by another customer?
-            const activeLoan = await prisma.loan.findFirst({
-                where: { isbnId: isbnId, returnDate: null },
+           const isAvailable = await prisma.bookIsbn.findFirst({
+                where: {
+                    isbn: isbn,        
+                    loans: { none: { returnDate: null } },
+                }
             });
-            if (activeLoan) {
-               throw new Error("This book copy is already loaned out");
+            if (!isAvailable) {
+                throw new Error("This book copy is already loaned out");
             }
 
             const bookDetails = await prisma.bookIsbn.findUnique({
-                where: { id: isbnId },
+                where: { id: isAvailable.id },
                 include: { book: true },
             });
-
             if (!bookDetails) {
                 throw new Error("Book details not found");
             }
@@ -56,7 +58,7 @@ class LoanService {
                 data: 
                 {
                     userId: userId, 
-                    isbnId: isbnId, 
+                    isbnId: bookDetails.id, 
                     dueDate: dueDate, 
                     bookTitle: bookDetails.book.title,
                     bookAuthor: bookDetails.book.author,
