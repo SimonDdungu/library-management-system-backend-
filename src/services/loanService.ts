@@ -41,7 +41,7 @@ class LoanService {
                 }
             });
             if (!isAvailable) {
-                throw new Error("This book copy is already loaned out");
+                throw new Error("This book is not available.");
             }
 
             const bookDetails = await prisma.bookIsbn.findUnique({
