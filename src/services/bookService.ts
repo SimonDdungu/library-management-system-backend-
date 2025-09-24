@@ -1,13 +1,13 @@
 import prisma from "../database/model"
-import _ from "lodash";
 
 const limit = 20
 
 
 class BookService{
    
-    async getAllBooks(page: number, sortBy: string = "createdAt", order: "asc" | "desc" = "desc"){
+    async getAllBooks(filters: any){
         try{
+            const {page, sortBy, order} = filters
             const [books, totalRecords] = await Promise.all([ 
                 prisma.book.findMany({
                     skip: (page - 1) * limit,
@@ -29,14 +29,15 @@ class BookService{
 
     async createBook(title: string, author: string, publish_year: number, isbn: string){
         try {
-            await prisma.book.create({data: {title: title, author: _.startCase(_.toLower(author)), published_year: publish_year, bookIsbns: {create: {isbn: isbn}}}})
+            await prisma.book.create({data: {title: title, author: author, published_year: publish_year, bookIsbns: {create: {isbn: isbn}}}})
         } catch (err) {
             throw new Error("Failed to create books: " + (err as Error).message)
         }
     }
 
-    async findBooks(query: string, page: number = 1,  sortBy: string = "createdAt", order: "asc" | "desc" = "desc") {
+    async findBooks(query: string, filters: any) {
         try {
+            const{page,  sortBy, order} = filters
            const [books, totalRecords] = await Promise.all([ 
                 prisma.book.findMany({
                     where: {
