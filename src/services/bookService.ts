@@ -38,7 +38,7 @@ class BookService{
     async findBooks(query: string, filters: any) {
         try {
             const{page,  sortBy, order} = filters
-           const [books, totalRecords] = await Promise.all([ 
+            const [books, totalRecords] = await Promise.all([ 
                 prisma.book.findMany({
                     where: {
                         OR: [
@@ -71,9 +71,10 @@ class BookService{
         }
     }
 
-    async findBookTitle(title: string, page: number = 1, sortBy: string = "title", order: "asc" | "desc" = "asc") {
+    async findBookTitle(title: string, filters: any) {
         try {
-           const [books, totalRecords] = await Promise.all([ 
+            const{page,  sortBy, order} = filters
+            const [books, totalRecords] = await Promise.all([ 
                 prisma.book.findMany({
                     where: {
                         title: {contains: title, mode: "insensitive"}
@@ -99,9 +100,10 @@ class BookService{
         }
     }
 
-    async findBookAuthor(author: string, page: number = 1, sortBy: string = "author", order: "asc" | "desc" = "asc") {
+    async findBookAuthor(author: string, filters: any) {
         try {
-           const [Authors, totalRecords] =  await Promise.all([ 
+            const{page,  sortBy, order} = filters
+            const [Authors, totalRecords] =  await Promise.all([ 
                 prisma.book.findMany({
                     where: {
                         author: {contains: author, mode: "insensitive"}
@@ -127,8 +129,9 @@ class BookService{
         }
     }
 
-    async findByYear(year: number, page: number = 1, sortBy: string = "title", order: "asc" | "desc" = "asc") {
+    async findByYear(year: number, filters: any) {
         try {
+            const{page,  sortBy, order} = filters
             const [Years, totalRecords] = await Promise.all([ 
                 prisma.book.findMany({
                     where: { published_year: year },
@@ -161,7 +164,7 @@ class BookService{
             return { data: ISBN};
             
         } catch (err) {
-            throw new Error("Failed to filter book years: " + (err as Error).message);
+            throw new Error("Failed to find the book isbn: " + (err as Error).message);
         }
     }
 
