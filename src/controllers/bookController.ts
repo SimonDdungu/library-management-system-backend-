@@ -8,11 +8,14 @@ const Joi = require('joi');
 
 
 class BookController {
-    async getAllBooks(filters?: searchFilters){
+    async getAllBooks(req: Request){
         try {
-            const {page = 1, sortedBy = "createdAt", order = "desc"} = filters || {}
+            //const {page = 1, sortedBy = "createdAt", order = "desc"} = filters || {}
+            const {page = "1", sortedBy = "createdAt", order = "desc"} = req.query as searchFilters
 
-            return await services.books.getAllBooks({page, sortedBy, order})
+            let currentPage = Number(page)
+
+            return await services.books.getAllBooks({currentPage, sortedBy, order})
         } catch (error) {
             throw error
         }
@@ -47,7 +50,7 @@ class BookController {
         }
     }
 
-    async findBooks(req: Request, filters: searchFilters){
+    async findBooks(req: Request){
         try {
             const schema = Joi.object({
             query: Joi.string().required()
@@ -56,34 +59,43 @@ class BookController {
             const payload = await schema.validateAsync(req.query)
 
             const {query} = payload
-            const {page = 1, sortedBy = "createdAt", order = "desc"} = filters || {}
+            //const {page = 1, sortedBy = "createdAt", order = "desc"} = filters || {}
+            const {page = "1", sortedBy = "createdAt", order = "desc"} = req.query as searchFilters
 
-            return await services.books.findBooks(query, {page, sortedBy, order})
+            let currentPage = Number(page)
+            
+
+            return await services.books.findBooks(query, {currentPage, sortedBy, order})
             
         } catch (error) {
             throw error
         }
     }
 
-    async findBookTitle(req: Request, filters?: searchFilters){
+    async findBookTitle(req: Request){
         try {
             const schema = Joi.object({
             title: Joi.string().required()
             })
 
+            
             const payload = await schema.validateAsync(req.query)
 
             const {title} = payload
-            const {page = 1, sortedBy = "title", order = "asc"} = filters || {}
+            //const {page = 1, sortedBy = "title", order = "asc"} = filters || {}
+            const {page = "1", sortedBy = "title", order = "asc"} = req.query as searchFilters
 
-            return await services.books.findBookTitle(title, {page, sortedBy, order})
+            let currentPage = Number(page)
+
+
+            return await services.books.findBookTitle(title, {currentPage, sortedBy, order})
             
         } catch (error) {
             throw error
         }
     }
 
-    async findBookAuthor(req: Request, filters: searchFilters){
+    async findBookAuthor(req: Request){
         try {
             const schema = Joi.object({
             author: Joi.string().required()
@@ -92,27 +104,37 @@ class BookController {
             const payload = await schema.validateAsync(req.query)
 
             const {author} = payload
-            const {page = 1, sortedBy = "author", order = "asc"} = filters || {}
+            //const {page = 1, sortedBy = "author", order = "asc"} = filters || {}
+            const {page = "1", sortedBy = "author", order = "asc"} = req.query as searchFilters
 
-            return await services.books.findBookAuthor(author, {page, sortedBy, order})
+            let currentPage = Number(page)
+
+            return await services.books.findBookAuthor(author, {currentPage, sortedBy, order})
             
         } catch (error) {
             throw error
         }
     }
 
-    async findByYear(req: Request, filters: searchFilters){
+    async findByYear(req: Request){
         try {
             const schema = Joi.object({
-            year: Joi.number().integer().required().max(4)
+            Year: Joi.number().integer().required().max(4)
             })
 
-            const payload = await schema.validateAsync(req.query)
+            const {year} = req.query
+            let SearchedYear = Number(year)
 
-            const {year} = payload
-            const {page = 1, sortedBy = "author", order = "asc"} = filters || {}
 
-            return await services.books.findByYear(year, {page, sortedBy, order})
+            const payload = await schema.validateAsync(SearchedYear)
+
+            const {Year} = payload
+            //const {page = 1, sortedBy = "year", order = "desc"} = filters || {}
+            const {page = "1", sortedBy = "year", order = "desc"} = req.query as searchFilters
+
+            let currentPage = Number(page)
+
+            return await services.books.findByYear(Year, {currentPage, sortedBy, order})
             
         } catch (error) {
             throw error
@@ -130,6 +152,23 @@ class BookController {
             const {isbn} = payload
     
             return await services.books.findByISBN(isbn)
+            
+        } catch (error) {
+            throw error
+        }
+    }
+
+    async findById(req: Request){
+        try {
+            const schema = Joi.object({
+            id: Joi.string().required()
+            })
+
+            const payload = await schema.validateAsync(req.params)
+
+            const {id} = payload
+    
+            return await services.books.findById(id)
             
         } catch (error) {
             throw error

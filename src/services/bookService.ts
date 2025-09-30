@@ -7,10 +7,10 @@ class BookService{
    
     async getAllBooks(filters: any){
         try{
-            const {page, sortBy, order} = filters
+            const {currentPage, sortBy, order} = filters
             const [books, totalRecords] = await Promise.all([ 
                 prisma.book.findMany({
-                    skip: (page - 1) * limit,
+                    skip: (currentPage - 1) * limit,
                     take: limit,
                     orderBy: { [sortBy] : order },
                     include: { bookIsbns: true },
@@ -20,7 +20,7 @@ class BookService{
 
             const totalPages = Math.ceil(totalRecords / limit);
 
-            return { data: books, totalRecords, totalPages,  page };
+            return { data: books, totalRecords, totalPages,  currentPage };
 
         }catch (err){
             throw new Error("Failed to fetch books: " + (err as Error).message);
@@ -37,7 +37,7 @@ class BookService{
 
     async findBooks(query: string, filters: any) {
         try {
-            const{page,  sortBy, order} = filters
+            const{currentPage,  sortBy, order} = filters
             const [books, totalRecords] = await Promise.all([ 
                 prisma.book.findMany({
                     where: {
@@ -46,7 +46,7 @@ class BookService{
                         { author: { contains: query, mode: "insensitive" } },
                         ],
                     },
-                    skip: (page - 1) * limit,
+                    skip: (currentPage - 1) * limit,
                     take: limit,
                     orderBy: { [sortBy]: order },
                     include: { bookIsbns: true },
@@ -64,7 +64,7 @@ class BookService{
 
             const totalPages = Math.ceil(totalRecords / limit);
 
-            return { data: books, totalRecords, totalPages,  page };
+            return { data: books, totalRecords, totalPages,  currentPage };
 
         } catch (err) {
             throw new Error("Failed to filter books: " + (err as Error).message);
@@ -73,13 +73,13 @@ class BookService{
 
     async findBookTitle(title: string, filters: any) {
         try {
-            const{page,  sortBy, order} = filters
+            const{currentPage,  sortBy, order} = filters
             const [books, totalRecords] = await Promise.all([ 
                 prisma.book.findMany({
                     where: {
                         title: {contains: title, mode: "insensitive"}
                     },
-                    skip: (page - 1) * limit,
+                    skip: (currentPage - 1) * limit,
                     take: limit,
                     orderBy: { [sortBy]: order },
                     include: { bookIsbns: true },
@@ -93,7 +93,7 @@ class BookService{
 
         const totalPages = Math.ceil(totalRecords / limit)
 
-        return { data: books, totalRecords, totalPages,  page };
+        return { data: books, totalRecords, totalPages,  currentPage };
 
         } catch (err) {
             throw new Error("Failed to filter book titles: " + (err as Error).message);
@@ -131,11 +131,11 @@ class BookService{
 
     async findByYear(year: number, filters: any) {
         try {
-            const{page,  sortBy, order} = filters
+            const{currentPage,  sortBy, order} = filters
             const [Years, totalRecords] = await Promise.all([ 
                 prisma.book.findMany({
                     where: { published_year: year },
-                    skip: (page - 1) * limit,
+                    skip: (currentPage - 1) * limit,
                     take: limit,
                     orderBy: { [sortBy]: order },
                     include: { bookIsbns: true },
@@ -147,7 +147,7 @@ class BookService{
 
             const totalPages = Math.ceil(totalRecords / limit)
 
-            return { data: Years, totalRecords, totalPages,  page };
+            return { data: Years, totalRecords, totalPages,  currentPage };
             
         } catch (err) {
             throw new Error("Failed to filter book years: " + (err as Error).message);
@@ -162,6 +162,20 @@ class BookService{
                 })
 
             return { data: ISBN};
+            
+        } catch (err) {
+            throw new Error("Failed to find the book isbn: " + (err as Error).message);
+        }
+    }
+
+    async findById(id: string) {
+        try {
+            const book = await prisma.book.findUnique({
+                    where: { id: id},
+                    include: { bookIsbns: true },
+                })
+
+            return { data: book};
             
         } catch (err) {
             throw new Error("Failed to find the book isbn: " + (err as Error).message);

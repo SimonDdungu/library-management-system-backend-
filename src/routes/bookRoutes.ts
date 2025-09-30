@@ -8,7 +8,25 @@ const router = express.Router()
 
 router.get("/", async (req: Request, res: Response) => {
     try {
-        const data: any = await controllers.books.getAllBooks()
+        const data: any = await controllers.books.getAllBooks(req)
+        sendSuccessMessage(res, data)
+    } catch (error: unknown) {
+        sendErrorMessage(res, error)
+    }
+})
+
+router.get("/search", async (req: Request, res: Response) => {
+    try {
+        const data: any = await controllers.books.findBooks(req)
+        sendSuccessMessage(res, data)
+    } catch (error: unknown) {
+        sendErrorMessage(res, error)
+    }
+})
+
+router.get("/search/:id", async (req: Request, res: Response) => {
+    try {
+        const data: any = await controllers.books.findById(req)
         sendSuccessMessage(res, data)
     } catch (error: unknown) {
         sendErrorMessage(res, error)
@@ -24,8 +42,39 @@ router.get("/search/title", async (req: Request, res: Response) => {
     }
 })
 
+router.get("/search/year", async (req: Request, res: Response) => {
+    try {
+        const data: any = await controllers.books.findByYear(req)
+        sendSuccessMessage(res, data)
+    } catch (error: unknown) {
+        sendErrorMessage(res, error)
+    }
+})
 
-router.post("/createbook", async (req: Request, res: Response) => {
+router.get("/search/author", async (req: Request, res: Response) => {
+    try {
+        const data: any = await controllers.books.findBookAuthor(req)
+        sendSuccessMessage(res, data)
+    } catch (error: unknown) {
+        sendErrorMessage(res, error)
+    }
+})
+
+router.get("/search/isbn", async (req: Request, res: Response) => {
+    try {
+        const data: any = await controllers.books.findByISBN(req)
+        sendSuccessMessage(res, data)
+    } catch (error: unknown) {
+        sendErrorMessage(res, error)
+    }
+})
+
+
+
+
+
+
+router.post("/create/", async (req: Request, res: Response) => {
     try {
         const data: any = await controllers.books.createBook(req)
         sendSuccessMessage(res, data)
@@ -34,19 +83,36 @@ router.post("/createbook", async (req: Request, res: Response) => {
     }
 })
 
-router.put("/update/book/", async (req: Request, res: Response) => {
+
+
+
+
+
+router.put("/update/", async (req: Request, res: Response) => {
     try {
-        //const data: any = await controllers.ussd.updateUSSD(req)
-        
+        const data: any = await controllers.books.updateOneBook(req)
+        sendSuccessMessage(res, data)
     } catch (error: unknown) {
         sendErrorMessage(res, error)
     }
 })
 
-router.delete("/delete/book/", async (req: Request, res: Response) => {
+
+
+
+router.delete("/delete/", async (req: Request, res: Response) => {
     try {
-        //const data: any = await controllers.ussd.deleteUSSD(req)
-        
+        const data: any = await controllers.books.deleteOneBook(req)
+        sendSuccessMessage(res, data)
+    } catch (error: unknown) {
+        sendErrorMessage(res, error)
+    }
+})
+
+router.post("/delete/book/", async (req: Request, res: Response) => {
+    try {
+        const data: any = await controllers.books.deleteManyBooks(req)
+        sendSuccessMessage(res, data)
     } catch (error: unknown) {
         sendErrorMessage(res, error)
     }
