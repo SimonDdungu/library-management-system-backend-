@@ -8,11 +8,14 @@ const Joi = require('joi');
 
 
 class UserController {
-    async getAllUsers(filters?: searchFilters){
+    async getAllUsers(req: Request){
         try {
-            const {page = 1, sortedBy = "createdAt", order = "desc"} = filters || {}
+            //const {page = 1, sortedBy = "createdAt", order = "desc"} = filters || {}
+            const {page = "1", sortedBy = "createdAt", order = "desc"} = req.query as searchFilters
 
-            return await services.users.getAllUsers({page, sortedBy, order})
+            let currentPage = Number(page)
+
+            return await services.users.getAllUsers({currentPage, sortedBy, order})
         } catch (error) {
             throw error
         }
@@ -77,9 +80,12 @@ class UserController {
             const payload = await schema.validateAsync(req.query)
 
             const {name} = payload
-            const {page = 1, sortedBy = "name", order = "asc"} = filters || {}
+            //const {page = 1, sortedBy = "name", order = "asc"} = filters || {}
+            const {page = "1", sortedBy = "createdAt", order = "desc"} = req.query as searchFilters
 
-            return await services.users.findActiveUser(name, {page, sortedBy, order})
+            let currentPage = Number(page)
+
+            return await services.users.findActiveUser(name, {currentPage, sortedBy, order})
             
         } catch (error) {
             throw error
@@ -95,9 +101,12 @@ class UserController {
             const payload = await schema.validateAsync(req.query)
 
             const {name} = payload
-            const {page = 1, sortedBy = "name", order = "asc"} = filters || {}
+            //const {page = 1, sortedBy = "name", order = "asc"} = filters || {}
+            const {page = "1", sortedBy = "createdAt", order = "desc"} = req.query as searchFilters
 
-            return await services.users.findInActiveUser(name, {page, sortedBy, order})
+            let currentPage = Number(page)
+
+            return await services.users.findInActiveUser(name, {currentPage, sortedBy, order})
             
         } catch (error) {
             throw error

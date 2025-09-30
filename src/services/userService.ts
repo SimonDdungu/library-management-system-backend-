@@ -7,10 +7,10 @@ const limit = 20
 class UserService{
     async getAllUsers(filters: any){
         try{
-            const {page, sortBy, order} = filters
+            const {currentPage, sortBy, order} = filters
             const [users, totalRecords] = await Promise.all([ 
                 prisma.user.findMany({
-                    skip: (page - 1) * limit,
+                    skip: (currentPage - 1) * limit,
                     take: limit,
                     orderBy: { [sortBy] : order },
                 }),
@@ -19,7 +19,7 @@ class UserService{
 
             const totalPages = Math.ceil(totalRecords / limit);
 
-            return { data: users, totalRecords, totalPages,  page };
+            return { data: users, totalRecords, totalPages,  currentPage };
 
         }catch (err){
             throw new Error("Failed to fetch users: " + (err as Error).message);
@@ -49,14 +49,14 @@ class UserService{
 
     async findActiveUser(name: string, filters: any) {
         try {
-            const {page, sortedBy, order} = filters
+            const {currentPage, sortedBy, order} = filters
             const [users, totalRecords] = await Promise.all([
                 prisma.user.findMany({
                     where: {
                         isActive: true,
                         name: { contains: name, mode: "insensitive" } 
                     },
-                    skip: (page - 1) * limit,
+                    skip: (currentPage - 1) * limit,
                     take: limit,
                     orderBy: { [sortedBy] : order },
                 }),
@@ -70,7 +70,7 @@ class UserService{
 
             const totalPages = Math.ceil(totalRecords / limit);
 
-            return { data: users, totalRecords, totalPages,  page };
+            return { data: users, totalRecords, totalPages,  currentPage };
 
         } catch (err) {
             throw new Error("Failed to filter active users: " + (err as Error).message);
@@ -79,14 +79,14 @@ class UserService{
 
     async findInActiveUser(name: string, filters: any) {
         try {
-            const {page, sortedBy, order} = filters
+            const {currentPage, sortedBy, order} = filters
             const [users, totalRecords] = await Promise.all([
                 prisma.user.findMany({
                     where: {
                         isActive: false,
                         name: { contains: name, mode: "insensitive" } 
                     },
-                    skip: (page - 1) * limit,
+                    skip: (currentPage - 1) * limit,
                     take: limit,
                     orderBy: { [sortedBy] : order },
                     },
@@ -101,7 +101,7 @@ class UserService{
 
             const totalPages = Math.ceil(totalRecords / limit);
 
-            return { data: users, totalRecords, totalPages,  page };
+            return { data: users, totalRecords, totalPages,  currentPage };
         } catch (err) {
             throw new Error("Failed to filter inactive users: " + (err as Error).message);
         }
