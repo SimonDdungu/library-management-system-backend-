@@ -60,7 +60,7 @@ class UserController {
             id: Joi.string().required()
             })
 
-            const payload = await schema.validateAsync(req.query)
+            const payload = await schema.validateAsync(req.params)
 
             const {id} = payload
 
