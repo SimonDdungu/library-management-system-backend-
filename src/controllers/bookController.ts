@@ -71,7 +71,7 @@ class BookController {
             title: Joi.string().required()
             })
 
-            const payload = await schema.validateAsync(req.body)
+            const payload = await schema.validateAsync(req.query)
 
             const {title} = payload
             const {page = 1, sortedBy = "title", order = "asc"} = filters || {}
