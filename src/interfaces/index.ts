@@ -1,5 +1,5 @@
 export interface searchFilters {
-    page?: number;
+    page?: number | string;
     sortedBy?: string;
     order?: "asc" | "desc";
 }
