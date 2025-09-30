@@ -1,0 +1,2 @@
+-- AlterTable
+ALTER TABLE "public"."User" ALTER COLUMN "NIN" SET DATA TYPE TEXT;
