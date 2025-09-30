@@ -84,7 +84,11 @@ class UserService{
                 prisma.user.findMany({
                     where: {
                         isActive: false,
-                        name: { contains: name, mode: "insensitive" } },
+                        name: { contains: name, mode: "insensitive" } 
+                    },
+                    skip: (page - 1) * limit,
+                    take: limit,
+                    orderBy: { [sortedBy] : order },
                     },
                 ),
                 prisma.user.count({
@@ -107,7 +111,7 @@ class UserService{
         try {
             return await prisma.user.findFirst({
                 where: {
-                    NIN: NIN,
+                    NIN: { equals: NIN, mode: "insensitive" },
                 },
             });
         } catch (err) {
@@ -139,18 +143,18 @@ class UserService{
         }
     }
 
-    async updateUser(id: string, name: string, email: string, phoneNumber: string, NIN: string){
+    async updateUser(id: string, name: string, email: string, phoneNumber: string, NIN: string, status: boolean){
         try {
             await prisma.user.update({
                 where: {id: id},
-                data: {name: name, email: email.toLowerCase(), phoneNumber: phoneNumber, NIN: NIN}
+                data: {name: name, email: email.toLowerCase(), phoneNumber: phoneNumber, NIN: NIN, isActive: status}
             })
         } catch (err) {
             throw new Error("Failed to update User: " + (err as Error).message);
         }
     }
 
-    async deleteUser(id: string) {
+    async deleteOneUser(id: string) {
         try {
             await prisma.user.update({
                 where: { id: id },
@@ -160,6 +164,39 @@ class UserService{
             throw new Error("Failed to delete User: " + (err as Error).message);
         }
     }
+
+     async deleteManyUsers(ids: string[]) {
+        try {
+            await prisma.user.updateMany({
+                where: { id: {in: ids} },
+                data: {isActive: false}
+            });
+        } catch (err) {
+            throw new Error("Failed to delete Many Users: " + (err as Error).message);
+        }
+    }
+
+    async permanentlyDeleteOneUser(id: string) {
+        try {
+            await prisma.user.delete({
+                where: { id: id }
+            });
+        } catch (err) {
+            throw new Error("Failed to permanently delete User: " + (err as Error).message);
+        }
+    }
+
+    async permanentlydeleteManyUsers(ids: string[]) {
+        try {
+            await prisma.user.deleteMany({
+                where: { id: {in: ids} }
+            });
+        } catch (err) {
+            throw new Error("Failed to permanently delete Many Users: " + (err as Error).message);
+        }
+    }
+
+   
 
 }
 

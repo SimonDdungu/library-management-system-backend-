@@ -198,6 +198,16 @@ class BookService{
         }
     }
 
+    async deleteManyBooks(ids: string[]) {
+        try {
+            await prisma.book.deleteMany({
+                where: { id: {in: ids} },
+            });
+        } catch (err) {
+            throw new Error("Failed to delete Many books: " + (err as Error).message);
+        }
+    }
+
 
 }
 
