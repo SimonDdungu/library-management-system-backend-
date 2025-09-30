@@ -1,5 +1,5 @@
 import { BookController } from "./bookController";
 
-const controllers = {
+export const controllers = {
     books: new BookController(),
 }
