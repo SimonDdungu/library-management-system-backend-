@@ -24,15 +24,6 @@ router.get("/search", async (req: Request, res: Response) => {
     }
 })
 
-router.get("/search/:id", async (req: Request, res: Response) => {
-    try {
-        const data: any = await controllers.books.findById(req)
-        sendSuccessMessage(res, data)
-    } catch (error: unknown) {
-        sendErrorMessage(res, error)
-    }
-})
-
 router.get("/search/title", async (req: Request, res: Response) => {
     try {
         const data: any = await controllers.books.findBookTitle(req)
@@ -63,6 +54,15 @@ router.get("/search/author", async (req: Request, res: Response) => {
 router.get("/search/isbn", async (req: Request, res: Response) => {
     try {
         const data: any = await controllers.books.findByISBN(req)
+        sendSuccessMessage(res, data)
+    } catch (error: unknown) {
+        sendErrorMessage(res, error)
+    }
+})
+
+router.get("/search/:id", async (req: Request, res: Response) => {
+    try {
+        const data: any = await controllers.books.findById(req)
         sendSuccessMessage(res, data)
     } catch (error: unknown) {
         sendErrorMessage(res, error)
