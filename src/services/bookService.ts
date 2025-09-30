@@ -156,7 +156,7 @@ class BookService{
 
     async findByISBN(isbn: string) {
         try {
-            const ISBN = await prisma.bookIsbn.findMany({
+            const ISBN = await prisma.bookIsbn.findFirst({
                     where: { isbn: {contains: isbn, mode: "insensitive"} },
                     include: { book: true },
                 })

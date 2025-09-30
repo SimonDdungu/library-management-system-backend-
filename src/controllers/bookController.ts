@@ -8,7 +8,7 @@ const Joi = require('joi');
 
 
 class BookController {
-    async getAllBooks(filters: searchFilters){
+    async getAllBooks(filters?: searchFilters){
         try {
             const {page = 1, sortedBy = "createdAt", order = "desc"} = filters || {}
 
@@ -65,7 +65,7 @@ class BookController {
         }
     }
 
-    async findBookTitle(req: Request, filters: searchFilters){
+    async findBookTitle(req: Request, filters?: searchFilters){
         try {
             const schema = Joi.object({
             title: Joi.string().required()

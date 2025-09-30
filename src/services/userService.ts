@@ -1,18 +1,32 @@
 import prisma from "../database/model";
+import { searchFilters } from "../interfaces";
 import _ from "lodash";
 
+const limit = 20
+
 class UserService{
-    async getAllUsers(){
+    async getAllUsers(filters: any){
         try{
-            return await prisma.user.findMany({
-                where: { isActive: true }, 
-            });
+            const {page, sortBy, order} = filters
+            const [users, totalRecords] = await Promise.all([ 
+                prisma.user.findMany({
+                    skip: (page - 1) * limit,
+                    take: limit,
+                    orderBy: { [sortBy] : order },
+                }),
+                prisma.user.count()
+            ])
+
+            const totalPages = Math.ceil(totalRecords / limit);
+
+            return { data: users, totalRecords, totalPages,  page };
+
         }catch (err){
             throw new Error("Failed to fetch users: " + (err as Error).message);
         }
     }
 
-    async createUser(name: string, email: string, phoneNumber: string, NIN: number){
+    async createUser(name: string, email: string, phoneNumber: string, NIN: string){
         try {
             await prisma.user.create({data: {name: _.startCase(_.toLower(name)), email: email.toLowerCase(), phoneNumber: phoneNumber, NIN: NIN}})
         } catch (err) {
@@ -33,35 +47,65 @@ class UserService{
     }
 
 
-    async findActiveUser(query: string) {
+    async findActiveUser(name: string, filters: any) {
         try {
-            return await prisma.user.findMany({
-                where: {
-                    isActive: true,
-                    name: { contains: query, mode: "insensitive" } },
-                },
-            );
+            const {page, sortedBy, order} = filters
+            const [users, totalRecords] = await Promise.all([
+                prisma.user.findMany({
+                    where: {
+                        isActive: true,
+                        name: { contains: name, mode: "insensitive" } 
+                    },
+                    skip: (page - 1) * limit,
+                    take: limit,
+                    orderBy: { [sortedBy] : order },
+                }),
+                prisma.user.count({
+                    where: {
+                        isActive: true,
+                        name: { contains: name, mode: "insensitive" } 
+                    },
+                })
+            ])
+
+            const totalPages = Math.ceil(totalRecords / limit);
+
+            return { data: users, totalRecords, totalPages,  page };
+
         } catch (err) {
             throw new Error("Failed to filter active users: " + (err as Error).message);
         }
     }
 
-    async findInActiveUser(query: string) {
+    async findInActiveUser(name: string, filters: any) {
         try {
-            return await prisma.user.findMany({
-                where: {
-                    isActive: false,
-                    name: { contains: query, mode: "insensitive" } },
-                },
-            );
+            const {page, sortedBy, order} = filters
+            const [users, totalRecords] = await Promise.all([
+                prisma.user.findMany({
+                    where: {
+                        isActive: false,
+                        name: { contains: name, mode: "insensitive" } },
+                    },
+                ),
+                prisma.user.count({
+                    where: {
+                        isActive: false,
+                        name: { contains: name, mode: "insensitive" } 
+                    },
+                })
+            ]) 
+
+            const totalPages = Math.ceil(totalRecords / limit);
+
+            return { data: users, totalRecords, totalPages,  page };
         } catch (err) {
             throw new Error("Failed to filter inactive users: " + (err as Error).message);
         }
     }
 
-    async findByNIN(NIN: number) {
+    async findByNIN(NIN: string) {
         try {
-            return await prisma.user.findUnique({
+            return await prisma.user.findFirst({
                 where: {
                     NIN: NIN,
                 },
@@ -95,7 +139,7 @@ class UserService{
         }
     }
 
-    async updateUser(id: string, name: string, email: string, phoneNumber: string, NIN: number){
+    async updateUser(id: string, name: string, email: string, phoneNumber: string, NIN: string){
         try {
             await prisma.user.update({
                 where: {id: id},
