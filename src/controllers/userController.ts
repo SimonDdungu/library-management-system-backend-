@@ -71,7 +71,7 @@ class UserController {
         }
     }
 
-    async findActiveUser(req: Request, filters?: searchFilters){
+    async findActiveUser(req: Request){
         try {
             const schema = Joi.object({
             name: Joi.string().required()
@@ -92,7 +92,7 @@ class UserController {
         }
     }
 
-    async findInactiveUser(req: Request, filters?: searchFilters){
+    async findInactiveUser(req: Request){
         try {
             const schema = Joi.object({
             name: Joi.string().required()
