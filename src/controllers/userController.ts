@@ -8,7 +8,7 @@ const Joi = require('joi');
 
 
 class UserController {
-    async getAllUsers(filters: searchFilters){
+    async getAllUsers(filters?: searchFilters){
         try {
             const {page = 1, sortedBy = "createdAt", order = "desc"} = filters || {}
 
@@ -43,7 +43,7 @@ class UserController {
                 }else if(phoneNumber_exists){
                     throw new Error("User with phone number already exists")
                 }else{
-                    return await services.books.createBook(name, email, phoneNumber, NIN)
+                    return await services.users.createUser(name, email, phoneNumber, NIN)
                 }
             }
         }catch(error){
@@ -57,7 +57,7 @@ class UserController {
             id: Joi.string().required()
             })
 
-            const payload = await schema.validateAsync(req.body)
+            const payload = await schema.validateAsync(req.query)
 
             const {id} = payload
 
@@ -68,13 +68,13 @@ class UserController {
         }
     }
 
-    async findActiveUser(req: Request, filters: searchFilters){
+    async findActiveUser(req: Request, filters?: searchFilters){
         try {
             const schema = Joi.object({
             name: Joi.string().required()
             })
 
-            const payload = await schema.validateAsync(req.body)
+            const payload = await schema.validateAsync(req.query)
 
             const {name} = payload
             const {page = 1, sortedBy = "name", order = "asc"} = filters || {}
@@ -86,13 +86,13 @@ class UserController {
         }
     }
 
-    async findInactiveUser(req: Request, filters: searchFilters){
+    async findInactiveUser(req: Request, filters?: searchFilters){
         try {
             const schema = Joi.object({
             name: Joi.string().required()
             })
 
-            const payload = await schema.validateAsync(req.body)
+            const payload = await schema.validateAsync(req.query)
 
             const {name} = payload
             const {page = 1, sortedBy = "name", order = "asc"} = filters || {}
@@ -104,35 +104,34 @@ class UserController {
         }
     }
 
-    async findByYear(req: Request, filters: searchFilters){
+    async findByNIN(req: Request){
         try {
             const schema = Joi.object({
-            year: Joi.number().integer().required().max(4)
+            NIN: Joi.number().string().required()
             })
 
-            const payload = await schema.validateAsync(req.body)
+            const payload = await schema.validateAsync(req.query)
 
-            const {year} = payload
-            const {page = 1, sortedBy = "author", order = "asc"} = filters || {}
+            const {NIN} = payload
 
-            return await services.books.findByYear(year, {page, sortedBy, order})
+            return await services.users.findByNIN(NIN)
             
         } catch (error) {
             throw error
         }
     }
 
-    async findByISBN(req: Request){
+    async findByEmail(req: Request){
         try {
             const schema = Joi.object({
-            isbn: Joi.string().required()
+            email: Joi.email().string().required()
             })
 
-            const payload = await schema.validateAsync(req.body)
+            const payload = await schema.validateAsync(req.query)
 
-            const {isbn} = payload
+            const {email} = payload
     
-            return await services.books.findByISBN(isbn)
+            return await services.users.findByEmail(email)
             
         } catch (error) {
             throw error
@@ -140,49 +139,107 @@ class UserController {
     }
 
     
-    async updateOneBook(req: Request){
+    async updateUser(req: Request){
         try {
             const schema = Joi.object({
                 id: Joi.string().required(),
-                title: Joi.string().required(),
-                author: Joi.string().required(),
-                publish_year: Joi.number().integer().required().max(4),
-                isbn_id: Joi.string().required(),
-                new_isbn: Joi.string().required(),
+                name: Joi.string().required(),
+                email: Joi.email().string().required(),
+                phoneNumber: Joi.string().required(),
+                NIN: Joi.string().required(),
+                status: Joi.boolean(),
             })
 
             const payload = await schema.validateAsync(req.body)
 
             if(payload.error == null){
-                const {id, title, author, publish_year, isbn_id, new_isbn} = payload
-                const Title = _.startCase(title)
-                const Author = _.startCase(author)
+                const {id, name, email, phoneNumber, NIN, status = true} = payload
 
-                const exists = await services.books.findByISBN(new_isbn)
 
-                if(exists){
-                    throw new Error("Book with ISBN already exists")
+                const NIN_exists = await services.users.findByNIN(NIN)
+                const email_exists = await services.users.findByEmail(email)
+                const phoneNumber_exists = await services.users.findByNIN(phoneNumber)
+
+
+                if(NIN_exists){
+                    throw new Error("User with NIN already exists")
+                }else if(email_exists){
+                    throw new Error("User with email already exists")
+                }else if(phoneNumber_exists){
+                    throw new Error("User with phone number already exists")
                 }else{
-                    return await services.books.updateOneBook(id, Title, Author, publish_year, isbn_id, new_isbn)
+                    return await services.users.updateUser(id, name, email, phoneNumber, NIN, status)
                 }
-            } 
+            }
         } catch (error) {
             throw error
         }
     }
 
 
-    async deleteOneBook(req: Request){
+    async deleteUser(req: Request){
         try {
             const schema = Joi.object({
             id: Joi.string().required()
+            })
+
+            const payload = await schema.validateAsync(req.params)
+
+            const {id} = payload
+    
+            return await services.users.deleteOneUser(id)
+
+        } catch (error) {
+            throw error
+        }
+    }
+
+    async deleteManyUsers(req: Request){
+        try {
+            const schema = Joi.object({
+            id: Joi.array().items(Joi.string())
             })
 
             const payload = await schema.validateAsync(req.body)
 
             const {id} = payload
     
-            return await services.books.deleteOneBook(id)
+            return await services.users.deleteManyUsers(id)
+
+        } catch (error) {
+            throw error
+        }
+    }
+
+
+    async permanentlyDeleteUser(req: Request){
+        try {
+            const schema = Joi.object({
+            id: Joi.string().required()
+            })
+
+            const payload = await schema.validateAsync(req.params)
+
+            const {id} = payload
+    
+            return await services.users.permanentlyDeleteOneUser(id)
+
+        } catch (error) {
+            throw error
+        }
+    }
+
+    async permanentlyDeleteManyUsers(req: Request){
+        try {
+            const schema = Joi.object({
+            id: Joi.array().items(Joi.string())
+            })
+
+            const payload = await schema.validateAsync(req.body)
+
+            const {id} = payload
+    
+            return await services.users.permanentlydeleteManyUsers(id)
 
         } catch (error) {
             throw error

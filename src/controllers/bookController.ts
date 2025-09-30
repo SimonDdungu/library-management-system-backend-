@@ -53,7 +53,7 @@ class BookController {
             query: Joi.string().required()
             })
 
-            const payload = await schema.validateAsync(req.body)
+            const payload = await schema.validateAsync(req.query)
 
             const {query} = payload
             const {page = 1, sortedBy = "createdAt", order = "desc"} = filters || {}
@@ -89,7 +89,7 @@ class BookController {
             author: Joi.string().required()
             })
 
-            const payload = await schema.validateAsync(req.body)
+            const payload = await schema.validateAsync(req.query)
 
             const {author} = payload
             const {page = 1, sortedBy = "author", order = "asc"} = filters || {}
@@ -107,7 +107,7 @@ class BookController {
             year: Joi.number().integer().required().max(4)
             })
 
-            const payload = await schema.validateAsync(req.body)
+            const payload = await schema.validateAsync(req.query)
 
             const {year} = payload
             const {page = 1, sortedBy = "author", order = "asc"} = filters || {}
@@ -125,7 +125,7 @@ class BookController {
             isbn: Joi.string().required()
             })
 
-            const payload = await schema.validateAsync(req.body)
+            const payload = await schema.validateAsync(req.query)
 
             const {isbn} = payload
     
@@ -175,11 +175,28 @@ class BookController {
             id: Joi.string().required()
             })
 
-            const payload = await schema.validateAsync(req.body)
+            const payload = await schema.validateAsync(req.params)
 
             const {id} = payload
     
             return await services.books.deleteOneBook(id)
+
+        } catch (error) {
+            throw error
+        }
+    }
+
+    async deleteManyBooks(req: Request){
+        try {
+            const schema = Joi.object({
+            id: Joi.array().items(Joi.string())
+            })
+
+            const payload = await schema.validateAsync(req.body)
+
+            const {id} = payload
+    
+            return await services.books.deleteManyBooks(id)
 
         } catch (error) {
             throw error
