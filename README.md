@@ -10,10 +10,10 @@ Provides full management of books, loans, and members to maintain an organized l
 * Prisma
 * Docker
 
-## Prerequisites
+### Prerequisites
 [**Docker**](https://www.docker.com/)
 
-## Cloning Instructions (In your Terminal)
+### Cloning Instructions (In your Terminal)
 1. git clone https://github.com/SimonDdungu/library-management-system-backend-.git
 2. cd library-management-system-backend-
 3. cp .env.example .env (Edit .env file variables)
@@ -28,7 +28,7 @@ docker run -p 3008:3008 --env-file .env -v %cd%:/app -v /app/node_modules librar
 
 
 
-## BACKEND IS STILL IN EARLY DEVELOPMENT!!!
+### BACKEND IS STILL IN EARLY DEVELOPMENT!!!
 
 This application was built by me to showcase my skills and add to my portfolio, not for commercial purposes. 
 [My Portfolio](https://portfolio-v2-0-six.vercel.app/)
