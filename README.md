@@ -11,7 +11,7 @@ Provides full management of books, loans, and members to maintain an organized l
 * Docker
 
 ### Prerequisites
-[**Docker**](https://www.docker.com/)
+[**Docker**](https://www.docker.com/)  
 [**PostgreSQL**](https://www.postgresql.org/download/)
 
 ### Cloning Instructions (In your Terminal)
