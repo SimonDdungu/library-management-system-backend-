@@ -31,6 +31,31 @@ model BookIsbn {
   updatedAt DateTime  @updatedAt
 }
 
+model Roles {
+  id Int @id @default(autoincrement())
+  name String @unique
+  position Position[]
+}
+
+model Position {
+  id Int @id @default(autoincrement())
+  name String @unique
+  admin Admin[]
+  roleId  Int 
+  role  Roles @relation(fields: [roleId], references: [id])
+}
+
+model Admin {
+  id    String    @id @default(uuid())
+  name String
+  email String  @unique
+  phoneNumber String  @unique
+  password String
+  positionId  Int @default(1)
+  position  Position @relation(fields: [positionId], references: [id])
+  isActive  Boolean @default(true)
+}
+
 model User {
   id    String    @id @default(uuid())
   name  String
