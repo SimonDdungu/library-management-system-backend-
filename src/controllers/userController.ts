@@ -1,7 +1,8 @@
-import { Request } from "express"
+import { Request, Response } from "express"
 import { services } from '../services'
 import { searchFilters } from "../interfaces";
 import _ from "lodash";
+import bcrypt from "bcrypt";
 
 const Joi = require('joi');
 
@@ -21,12 +22,12 @@ class UserController {
         }
     }
     
-    async createUser(req: Request){
+    async createUser(req: Request, res: Response){
         try{
             const schema = Joi.object({
-                name: Joi.string().required(),
-                email: Joi.email().string().required(),
-                phoneNumber: Joi.string().required(),
+                name: Joi.string().required().min(3),
+                email: Joi.email().string().required().lowercase(),
+                phoneNumber: Joi.string().required().min(8),
                 NIN: Joi.string().required()
             })
 
@@ -37,14 +38,14 @@ class UserController {
 
                 const NIN_exists = await services.users.findByNIN(NIN)
                 const email_exists = await services.users.findByEmail(email)
-                const phoneNumber_exists = await services.users.findByNIN(phoneNumber)
+                const phoneNumber_exists = await services.users.findByPhoneNumber(phoneNumber)
 
                 if(NIN_exists){
-                    throw new Error("User with NIN already exists")
+                    return res.status(409).json({ message: "User with NIN already exists"})
                 }else if(email_exists){
-                    throw new Error("User with email already exists")
+                    return res.status(409).json({ message: "User with email already exists"})
                 }else if(phoneNumber_exists){
-                    throw new Error("User with phone number already exists")
+                    return res.status(409).json({ message: "User with phone number already exists"})
                 }else{
                     return await services.users.createUser(name, email, phoneNumber, NIN)
                 }
@@ -147,8 +148,25 @@ class UserController {
         }
     }
 
+    async findByPhoneNumber(req: Request){
+        try {
+            const schema = Joi.object({
+            phoneNumber: Joi.string().min(8).required()
+            })
+
+            const payload = await schema.validateAsync(req.query)
+
+            const {phoneNumber} = payload
     
-    async updateUser(req: Request){
+            return await services.users.findByPhoneNumber(phoneNumber)
+        
+        } catch (error) {
+            throw error
+        }
+    }
+
+    
+    async updateUser(req: Request, res: Response){
         try {
             const schema = Joi.object({
                 id: Joi.string().required(),
@@ -171,11 +189,11 @@ class UserController {
 
 
                 if(NIN_exists){
-                    throw new Error("User with NIN already exists")
+                    return res.status(409).json({ message: "User with NIN already exists"})
                 }else if(email_exists){
-                    throw new Error("User with email already exists")
+                    return res.status(409).json({ message: "User with email already exists"})
                 }else if(phoneNumber_exists){
-                    throw new Error("User with phone number already exists")
+                    return res.status(409).json({ message: "User with phone number already exists"})
                 }else{
                     return await services.users.updateUser(id, name, email, phoneNumber, NIN, status)
                 }

@@ -1,4 +1,4 @@
-import { Request } from "express"
+import { Request, Response } from "express"
 import { services } from '../services'
 import { searchFilters } from "../interfaces";
 import _ from "lodash";
@@ -21,7 +21,7 @@ class BookController {
         }
     }
 
-    async createBook(req: Request){
+    async createBook(req: Request, res: Response){
         try{
             const schema = Joi.object({
                 title: Joi.string().required(),
@@ -40,7 +40,7 @@ class BookController {
                 const exists = await services.books.findByISBN(isbn)
 
                 if(exists){
-                    throw new Error("Book with ISBN already exists")
+                    return res.status(409).json({ message: "Book with ISBN already exists"})
                 }else{
                     return await services.books.createBook(Title, Author, publish_year, isbn)
                 }
@@ -176,7 +176,7 @@ class BookController {
     }
 
     
-    async updateOneBook(req: Request){
+    async updateOneBook(req: Request, res: Response){
         try {
             const schema = Joi.object({
                 id: Joi.string().required(),
@@ -197,7 +197,7 @@ class BookController {
                 const exists = await services.books.findByISBN(new_isbn)
 
                 if(exists){
-                    throw new Error("Book with ISBN already exists")
+                    return res.status(409).json({ message: "Book with ISBN already exists"})
                 }else{
                     return await services.books.updateOneBook(id, Title, Author, publish_year, isbn_id, new_isbn)
                 }

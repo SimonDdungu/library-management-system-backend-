@@ -127,7 +127,7 @@ class UserService{
                 },
             });
         } catch (err) {
-            throw new Error("Failed to filter by NIN: " + (err as Error).message);
+            throw new Error("Failed to filter by Email: " + (err as Error).message);
         }
     }
 
@@ -165,7 +165,7 @@ class UserService{
         }
     }
 
-     async deleteManyUsers(ids: string[]) {
+    async deleteManyUsers(ids: string[]) {
         try {
             await prisma.user.updateMany({
                 where: { id: {in: ids} },
