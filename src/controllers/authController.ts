@@ -26,18 +26,17 @@ class AuthController {
                 const email_exists = await services.admin.findByEmail(email)
                 const phoneNumber_exists = await services.admin.findByPhoneNumber(phoneNumber)
 
-                const hashed_password = await bcrypt.hash(password, passwordSalt);
-
                 if(email_exists){
                      return res.status(409).json({ message: "Admin with email already exists"})
                 }else if(phoneNumber_exists){
                      return res.status(409).json({ message: "Admin with phone number already exists"})
                 }else{
+                    const hashed_password = await bcrypt.hash(password, passwordSalt);
                     return await services.admin.createAdmin(name, email, phoneNumber, hashed_password, position)
                 }
             }
         }catch(error){
-            res.status(500).json({status: 500, message: error})
+            res.status(500).json({status: 500, message: (error as Error).message})
         }
     }
 
