@@ -7,7 +7,7 @@
     "build": "tsc",
     "start": "node dist/index.js",
     "dev": "nodemon",
-    "token": "node src/util/generateToken.ts"
+    "token": "ts-node src/util/generateToken.ts"
   },
   "keywords": [],
   "author": "",
