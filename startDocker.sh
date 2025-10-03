@@ -10,5 +10,5 @@ npx prisma db seed || echo "[WARN] Seeding failed, continuing..."
 
 echo "Done seeding!"
 
-echo "[INFO] Starting dev server..."
+echo "Starting dev server..."
 exec npm run dev
