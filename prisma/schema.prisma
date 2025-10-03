@@ -39,7 +39,7 @@ model Roles {
 
 model Position {
   id Int @id @default(autoincrement())
-  name String @unique
+  title String @unique
   admin Admin[]
   roleId  Int 
   role  Roles @relation(fields: [roleId], references: [id])
