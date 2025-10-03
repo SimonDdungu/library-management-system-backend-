@@ -8,8 +8,10 @@ RUN npm ci
 
 COPY . .
 
+RUN chmod +x /startDocker.sh
+
 RUN npm run build
 
 EXPOSE 3008
 
-CMD ["npm", "run", "dev"]
+ENTRYPOINT ["/startDocker.sh"]
