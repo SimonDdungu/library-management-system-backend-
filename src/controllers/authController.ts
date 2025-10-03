@@ -5,6 +5,8 @@ import bcrypt from "bcrypt";
 
 const Joi = require('joi');
 
+const passwordSalt: any = process.env.PASSWORD_SALT
+
 class AuthController {
     async createAdmin(req: Request, res: Response){
         try{
@@ -24,7 +26,7 @@ class AuthController {
                 const email_exists = await services.admin.findByEmail(email)
                 const phoneNumber_exists = await services.admin.findByPhoneNumber(phoneNumber)
 
-                const hashed_password = await bcrypt.hash(password, 10);
+                const hashed_password = await bcrypt.hash(password, passwordSalt);
 
                 if(email_exists){
                      return res.status(409).json({ message: "Admin with email already exists"})
@@ -35,7 +37,7 @@ class AuthController {
                 }
             }
         }catch(error){
-            throw error
+            res.status(500).json({status: 500, message: error})
         }
     }
 
@@ -166,7 +168,7 @@ class AuthController {
         if(payload.error == null){ 
             const {id, password} = payload
 
-            const hashed_password = await bcrypt.hash(password, 10);
+            const hashed_password = await bcrypt.hash(password, passwordSalt);
 
             return await services.admin.updateAdminPassword(id, hashed_password)
         }

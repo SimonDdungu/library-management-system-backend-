@@ -18,6 +18,10 @@ class BookService{
                 prisma.book.count()
             ])
 
+            if(!books){
+                throw new Error("There are no books yet.")
+            }
+
             const totalPages = Math.ceil(totalRecords / limit);
 
             return { data: books, totalRecords, totalPages,  currentPage };
@@ -29,6 +33,10 @@ class BookService{
 
     async createBook(title: string, author: string, publish_year: number, isbn: string){
         try {
+            if( !title || !author || !publish_year || !isbn ){
+                throw new Error("Please fill in all fields.")
+            }
+
             await prisma.book.create({data: {title: title, author: author, published_year: publish_year, bookIsbns: {create: {isbn: isbn}}}})
         } catch (err) {
             throw new Error("Failed to create books: " + (err as Error).message)
@@ -61,6 +69,10 @@ class BookService{
                 })
             ])
 
+            if(!books){
+                throw new Error("No books could be found.")
+            }
+
 
             const totalPages = Math.ceil(totalRecords / limit);
 
@@ -91,6 +103,10 @@ class BookService{
                 })
             ])
 
+            if(!books){
+                throw new Error("Books with that title could not be found.")
+            }
+
         const totalPages = Math.ceil(totalRecords / limit)
 
         return { data: books, totalRecords, totalPages,  currentPage };
@@ -120,6 +136,10 @@ class BookService{
                 })
             ])
 
+            if(!Authors){
+                throw new Error("Books from that author could not be found.")
+            }
+
         const totalPages = Math.ceil(totalRecords / limit)
 
         return { data: Authors, totalRecords, totalPages,  page };
@@ -145,6 +165,10 @@ class BookService{
                 })
             ])
 
+            if(!Years){
+                throw new Error("Books by from that year could not be found.")
+            }
+
             const totalPages = Math.ceil(totalRecords / limit)
 
             return { data: Years, totalRecords, totalPages,  currentPage };
@@ -160,6 +184,9 @@ class BookService{
                     where: { isbn: {contains: isbn, mode: "insensitive"} },
                     include: { book: true },
                 })
+            if(!ISBN){
+                throw new Error("Book by that ISBN could not be found.")
+            }
 
             return { data: ISBN};
             
@@ -175,6 +202,10 @@ class BookService{
                     include: { bookIsbns: true },
                 })
 
+            if(!book){
+                throw new Error("Book by that ID could not be found.")
+            }
+
             return { data: book};
             
         } catch (err) {
@@ -184,6 +215,10 @@ class BookService{
 
     async updateOneBook(id: string, title: string, author: string, published_year: number, isbnId: string, newIsbn: string) {
         try {
+            if(!id || !title || !author || !published_year || !isbnId || !newIsbn){
+                throw new Error("Please fill in all fields.")
+            }
+
             await prisma.book.update({
             where: { id: id },
             data: {
@@ -204,6 +239,10 @@ class BookService{
 
     async deleteOneBook(id: string) {
         try {
+            if(!id){
+                throw new Error("Please fill in an ID")
+            }
+
             await prisma.book.delete({
                 where: { id },
             });
@@ -214,6 +253,10 @@ class BookService{
 
     async deleteManyBooks(ids: string[]) {
         try {
+            if(!ids){
+                throw new Error("Please fill in the IDs")
+            }
+            
             await prisma.book.deleteMany({
                 where: { id: {in: ids} },
             });
