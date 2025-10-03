@@ -76,7 +76,7 @@ router.get("/search/:id", async (req: Request, res: Response) => {
 
 router.post("/create/", async (req: Request, res: Response) => {
     try {
-        const data: any = await controllers.books.createBook(req)
+        const data: any = await controllers.books.createBook(req, res)
         sendSuccessMessage(res, data)
     } catch (error: unknown) {
         sendErrorMessage(res, error)
@@ -90,7 +90,7 @@ router.post("/create/", async (req: Request, res: Response) => {
 
 router.put("/update/", async (req: Request, res: Response) => {
     try {
-        const data: any = await controllers.books.updateOneBook(req)
+        const data: any = await controllers.books.updateOneBook(req, res)
         sendSuccessMessage(res, data)
     } catch (error: unknown) {
         sendErrorMessage(res, error)

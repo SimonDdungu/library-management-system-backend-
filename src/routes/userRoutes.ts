@@ -67,7 +67,7 @@ router.get("/search/:id", async (req: Request, res: Response) => {
 
 router.post("/create/", async (req: Request, res: Response) => {
     try {
-        const data: any = await controllers.users.createUser(req)
+        const data: any = await controllers.users.createUser(req, res)
         sendSuccessMessage(res, data)
     } catch (error: unknown) {
         sendErrorMessage(res, error)
@@ -81,7 +81,7 @@ router.post("/create/", async (req: Request, res: Response) => {
 
 router.put("/update/", async (req: Request, res: Response) => {
     try {
-        const data: any = await controllers.users.updateUser(req)
+        const data: any = await controllers.users.updateUser(req, res)
         sendSuccessMessage(res, data)
     } catch (error: unknown) {
         sendErrorMessage(res, error)
