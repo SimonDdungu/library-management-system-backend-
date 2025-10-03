@@ -1,7 +1,6 @@
 import { Request, Response } from "express"
 import { services } from '../services'
 import _ from "lodash";
-import { searchFilters } from "../interfaces";
 import bcrypt from "bcrypt";
 
 const Joi = require('joi');
@@ -81,7 +80,7 @@ class AuthController {
 
             const {email} = payload
     
-            return await services.users.findByEmail(email)
+            return await services.admin.findByEmail(email)
             
         } catch (error) {
             throw error
@@ -98,7 +97,7 @@ class AuthController {
 
             const {phoneNumber} = payload
     
-            return await services.users.findByPhoneNumber(phoneNumber)
+            return await services.admin.findByPhoneNumber(phoneNumber)
         
         } catch (error) {
             throw error
@@ -115,7 +114,7 @@ class AuthController {
 
             const {position} = payload
     
-            return await services.users.findByPhoneNumber(position)
+            return await services.admin.findByPhoneNumber(position)
         
         } catch (error) {
             throw error
@@ -147,12 +146,31 @@ class AuthController {
                 }else if(phoneNumber_exists){
                      return res.status(409).json({ message: "Admin with phone number already exists"})
                 }else{
-                    return await services.users.updateUser(id, name, email, phoneNumber, position, status)
+                    return await services.admin.updateAdmin(id, name, email, phoneNumber, position, status)
                 }
             }
         } catch (error) {
             throw error
         }
+    }
+
+    async updatePassword(req: Request, res: Response){
+        const schema = Joi.object({
+                id: Joi.string().required(),
+                password: Joi.string().required().min(8).pattern(/[a-z]/, "lowercase").pattern(/[A-Z]/, "UPPERCASE").pattern(/[0-9]/, "number"),
+        })
+
+
+        const payload = await schema.validateAsync(req.body)
+
+        if(payload.error == null){ 
+            const {id, password} = payload
+
+            const hashed_password = await bcrypt.hash(password, 10);
+
+            return await services.admin.updateAdminPassword(id, hashed_password)
+        }
+        
     }
 
 

@@ -58,6 +58,17 @@ class AdminService {
         }
     }
 
+    async updateAdminPassword(id: string, password: string){
+        try {
+            await prisma.admin.update({
+                where: {id: id},
+                data: {password: password}
+            })
+        } catch (err) {
+            throw new Error("Failed to update Admin Password: " + (err as Error).message);
+        }
+    }
+
     async deleteOneAdmin(id: string) {
         try {
             await prisma.admin.update({
