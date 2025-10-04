@@ -71,6 +71,23 @@ class AuthController {
         }
     }
 
+    async findById(req: Request){
+        try {
+            const schema = Joi.object({
+            id: Joi.string().required()
+            })
+
+            const payload = await schema.validateAsync(req.query)
+
+            const {id} = payload
+    
+            return await services.admin.findById(id)
+            
+        } catch (error) {
+            throw error
+        }
+    }
+
     async findByEmail(req: Request){
         try {
             const schema = Joi.object({

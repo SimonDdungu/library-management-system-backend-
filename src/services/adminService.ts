@@ -23,6 +23,19 @@ class AdminService {
         }
     }
 
+    async findById(id: string) {
+        try {
+            return await prisma.admin.findUnique({
+                where: {
+                    id: id,
+                },
+                include: {position: true}
+            });
+        } catch (err) {
+            throw new Error("Failed to filter by ID: " + (err as Error).message);
+        }
+    }
+
     async findByEmail(email: string) {
         try {
             return await prisma.admin.findFirst({
