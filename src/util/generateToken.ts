@@ -24,7 +24,7 @@ export const generateRefreshToken = (payload: object) => {
     return token
 }
 
-export const newAccessToken = async(req: Request, res: Response) => {
+export const newTokens = async(req: Request, res: Response) => {
     const refreshToken = req.body.refreshToken
     const refreshSecret = config.Refresh_Token_Secret
 
