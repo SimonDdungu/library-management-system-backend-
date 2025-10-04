@@ -6,6 +6,6 @@ export const authorized = (policy: any, resource?: any) => (req: Request, res: R
     if(policy(user)){
         return next()
     }else {
-        return res.status(403).json({status: 403, message: "Access Denied"})
+        return res.status(402).json({status: 402, message: "Access Denied"})
     }
 }
