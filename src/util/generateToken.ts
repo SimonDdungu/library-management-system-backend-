@@ -41,7 +41,7 @@ export const newTokens = async(req: Request, res: Response) => {
         }
 
         const NewAccesstoken = generateAccessToken(user)
-        const NewRefreshtoken = generateAccessToken(user)
+        const NewRefreshtoken = generateRefreshToken(user)
 
         return {NewAccesstoken, NewRefreshtoken}
 
