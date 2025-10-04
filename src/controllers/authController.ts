@@ -2,6 +2,7 @@ import { Request, Response } from "express"
 import { services } from '../services'
 import _ from "lodash";
 import bcrypt from "bcrypt";
+import { generateToken } from "../util/generateToken";
 
 const Joi = require('joi');
 
@@ -32,7 +33,8 @@ class AuthController {
                      return res.status(409).json({ message: "Admin with phone number already exists"})
                 }else{
                     const hashed_password = await bcrypt.hash(password, passwordSalt);
-                    return await services.admin.createAdmin(name, email, phoneNumber, hashed_password, position)
+                    const newAdmin = await services.admin.createAdmin(name, email, phoneNumber, hashed_password, position)
+                    return generateToken(newAdmin)
                 }
             }
         }catch(error){

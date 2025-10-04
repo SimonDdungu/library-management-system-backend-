@@ -5,7 +5,7 @@ import _ from "lodash";
 class AdminService {
     async createAdmin(name: string, email: string, phoneNumber: string, password: string, position: number){
         try {
-            await prisma.admin.create({data: {name: _.startCase(_.toLower(name)), email: email.toLowerCase(), phoneNumber: phoneNumber, password: password, positionId: position}})
+            return await prisma.admin.create({data: {name: _.startCase(_.toLower(name)), email: email.toLowerCase(), phoneNumber: phoneNumber, password: password, positionId: position}})
         } catch (err) {
             throw new Error("Failed to create Admin: " + (err as Error).message)
         }

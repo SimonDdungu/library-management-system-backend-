@@ -10,7 +10,7 @@ interface UserAccess {
 export const verifyToken = (req: Request, res: Response, next: NextFunction) => {
     let token;
     let authHeader = req.headers.authorization
-    let jwtsecret = config.Jwt_Secret
+    let jwtsecret = config.Access_Token_Secret
 
     if(authHeader && authHeader.startsWith("Bearer")){
         token = authHeader.split(" ")[1]
