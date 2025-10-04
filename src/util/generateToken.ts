@@ -9,7 +9,7 @@ export const generateAccessToken = (payload: object) => {
 
     const token = jwt.sign(payload, secret, { expiresIn: "30s"})
 
-    console.log(`JWT Token: ${token}`)
+    console.log(`New Access Token: ${token}`)
 
     return token
 }
@@ -19,7 +19,7 @@ export const generateRefreshToken = (payload: object) => {
 
     const token = jwt.sign(payload, secret, { expiresIn: "7d"})
 
-    console.log(`JWT Token: ${token}`)
+    console.log(`New Refresh Token: ${token}`)
 
     return token
 }
