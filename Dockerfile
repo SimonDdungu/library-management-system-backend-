@@ -8,10 +8,10 @@ RUN npm ci
 
 COPY . .
 
-RUN chmod +x /startDocker.sh
+RUN npx prisma generate 
 
 RUN npm run build
 
 EXPOSE 3008
 
-ENTRYPOINT ["/startDocker.sh"]
+CMD [ "npm", "run", "dev" ]
