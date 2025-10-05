@@ -12,22 +12,16 @@ Provides full management of books, loans, and members to maintain an organized l
 
 ### Prerequisites
 [**Docker**](https://www.docker.com/)  
-[**PostgreSQL**](https://www.postgresql.org/download/)
 
-### Cloning Instructions (In your Terminal)
+### Cloning Instructions (Use your Terminal to execute commands)
 1. git clone https://github.com/SimonDdungu/library-management-system-backend-.git
 2. cd library-management-system-backend-
 3. cp .env.example .env (Edit .env file variables)
-4. docker build -t library-management-system-backend .
-5. For MacOS or Linux  
-docker run -p 3008:3008 --env-file .env -v $(pwd):/app -v /app/node_modules library-management-system-backend
-6. For Windows Powershell / Vscode  
-docker run -p 3008:3008 --env-file .env -v ${PWD}:/app -v /app/node_modules library-management-system-backend
-7. For Windows CMD  
-docker run -p 3008:3008 --env-file .env -v %cd%:/app -v /app/node_modules library-management-system-backend
-
-
-
+4. Start Docker daemon or Docker Desktop
+5. docker compose down
+4. docker compose up -d --build 
+5. docker compose exec app npx prisma migrate deploy
+6. docker compose exec app npx prisma db seed
 
 > **BACKEND IS STILL IN EARLY DEVELOPMENT!!!**
 
