@@ -2,7 +2,7 @@ import { Request, Response } from "express"
 import { services } from '../services'
 import _ from "lodash";
 import bcrypt from "bcrypt";
-import { generateToken } from "../util/generateToken";
+import { generateAccessToken, generateRefreshToken } from "../util/generateToken";
 
 const Joi = require('joi');
 
@@ -34,7 +34,7 @@ class AuthController {
                 }else{
                     const hashed_password = await bcrypt.hash(password, passwordSalt);
                     const newAdmin = await services.admin.createAdmin(name, email, phoneNumber, hashed_password, position)
-                    return generateToken(newAdmin)
+                    return [generateAccessToken(newAdmin), generateRefreshToken(newAdmin)]
                 }
             }
         }catch(error){

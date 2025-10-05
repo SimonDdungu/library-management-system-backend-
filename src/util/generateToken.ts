@@ -11,7 +11,7 @@ export const generateAccessToken = (payload: object) => {
 
     console.log(`New Access Token: ${token}`)
 
-    return token
+    return {Access_Token: token}
 }
 
 export const generateRefreshToken = (payload: object) => {
@@ -21,7 +21,7 @@ export const generateRefreshToken = (payload: object) => {
 
     console.log(`New Refresh Token: ${token}`)
 
-    return token
+    return {Refresh_Token: token}
 }
 
 export const newTokens = async(req: Request, res: Response) => {
