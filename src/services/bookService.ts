@@ -13,7 +13,7 @@ class BookService{
                     skip: (currentPage - 1) * limit,
                     take: limit,
                     orderBy: { [sortBy] : order },
-                    include: { bookIsbns: true },
+                    include: { bookIsbn: true },
                 }),
                 prisma.book.count()
             ])
@@ -37,7 +37,7 @@ class BookService{
                 throw new Error("Please fill in all fields.")
             }
 
-            await prisma.book.create({data: {title: title, author: author, published_year: publish_year, bookIsbns: {create: {isbn: isbn}}}})
+            await prisma.book.create({data: {title: title, author: author, published_year: publish_year, bookIsbn: {create: {isbn: isbn}}}})
         } catch (err) {
             throw new Error("Failed to create books: " + (err as Error).message)
         }
@@ -57,7 +57,7 @@ class BookService{
                     skip: (currentPage - 1) * limit,
                     take: limit,
                     orderBy: { [sortBy]: order },
-                    include: { bookIsbns: true },
+                    include: { bookIsbn: true },
                 }),
                 prisma.book.count({
                         where: {
@@ -94,7 +94,7 @@ class BookService{
                     skip: (currentPage - 1) * limit,
                     take: limit,
                     orderBy: { [sortBy]: order },
-                    include: { bookIsbns: true },
+                    include: { bookIsbn: true },
                 }),
                 prisma.book.count({
                     where: {
@@ -127,7 +127,7 @@ class BookService{
                     skip: (page - 1) * limit,
                     take: limit,
                     orderBy: { [sortBy]: order },
-                    include: { bookIsbns: true },
+                    include: { bookIsbn: true },
                 }),
                 prisma.book.count({
                     where: {
@@ -158,7 +158,7 @@ class BookService{
                     skip: (currentPage - 1) * limit,
                     take: limit,
                     orderBy: { [sortBy]: order },
-                    include: { bookIsbns: true },
+                    include: { bookIsbn: true },
                 }),
                 prisma.book.count({
                      where: { published_year: year },
@@ -195,11 +195,26 @@ class BookService{
         }
     }
 
+    async findTotalBooks(id: string){
+        try {
+            const isbn = await prisma.bookIsbn.count({
+                where: {id: id},
+            })
+            if(!isbn){
+                throw new Error("Book could not be found.")
+            }
+
+            return {data: isbn}
+        } catch (err) {
+            
+        }
+    }
+
     async findById(id: string) {
         try {
             const book = await prisma.book.findUnique({
                     where: { id: id},
-                    include: { bookIsbns: true },
+                    include: { bookIsbn: true },
                 })
 
             if(!book){
@@ -225,7 +240,7 @@ class BookService{
                 title: title,
                 author: author,
                 published_year: published_year,
-                bookIsbns: {
+                bookIsbn: {
                     update: {
                         where: { id: isbnId }, 
                         data: { isbn: newIsbn },

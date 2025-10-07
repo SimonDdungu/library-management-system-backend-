@@ -14,7 +14,7 @@ model Book {
   title          String
   author         String
   published_year Int
-  bookIsbns      BookIsbn[]
+  bookIsbn      BookIsbn[]
   createdAt DateTime @default(now())
   updatedAt DateTime  @updatedAt
   
@@ -70,6 +70,12 @@ model User {
   @@index([name])
 }
 
+model Status {
+  id  Int @id @default(autoincrement())
+  status  String
+  loan  Loan[]
+}
+
 model Loan {
   id        String       @id @default(uuid())
   isbnId    String
@@ -80,8 +86,10 @@ model Loan {
   loanDate  DateTime  @default(now())
   dueDate   DateTime?
   returnDate DateTime?
-  Cleared    Boolean   @default(false)
+  isActive  Boolean @default(true)
+  statusId    Int   @default(2)
   updatedAt DateTime  @updatedAt
+  status    Status  @relation(fields: [statusId], references: [id])
   bookIsbn  BookIsbn  @relation(fields: [isbnId], references: [id])
   user      User      @relation(fields: [userId], references: [id])
 }

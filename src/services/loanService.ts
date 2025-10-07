@@ -4,26 +4,72 @@ import _ from "lodash";
 const limit = 20
 
 class LoanService {
-     async getAllLoans(page: number, sortBy: string = "createdAt", order: "asc" | "desc" = "desc"){
+     async getAllLoans(filters: any){
         try{
+            const {currentPage, sortBy, order} = filters
             const [loans, totalRecords] = await Promise.all([ 
                 prisma.loan.findMany({
-                    skip: (page - 1) * limit,
+                    where: {
+                        user: {
+                            is: {isActive: true}
+                        }
+                    },
+                    include: {user: true, bookIsbn: {include: {book: true}}},
+                    skip: (currentPage - 1) * limit,
                     take: limit,
                     orderBy: { [sortBy] : order },
-                    include: { bookIsbn: true, user: true },
                 }),
-                prisma.loan.count()
+                prisma.loan.count({
+                    where: {
+                        user: {
+                            is: {isActive: true}
+                        }
+                    },
+                })
             ])
 
             const totalPages = Math.ceil(totalRecords / limit);
 
-            return { data: loans, totalRecords, totalPages,  page };
+            return { data: loans, totalRecords, totalPages,  currentPage };
 
         }catch (err){
             throw new Error("Failed to fetch loans: " + (err as Error).message);
         }
     }
+
+    async getAllDeletedLoans(filters: any){
+        try{
+            const {currentPage, sortBy, order} = filters
+            const [loans, totalRecords] = await Promise.all([ 
+                prisma.loan.findMany({
+                    where: {
+                        user: {
+                            is: {isActive: false}
+                        }
+                    },
+                    include: {user: true, bookIsbn: {include: {book: true}}},
+                    skip: (currentPage - 1) * limit,
+                    take: limit,
+                    orderBy: { [sortBy] : order },
+                }),
+                prisma.loan.count({
+                    where: {
+                        user: {
+                            is: {isActive: false}
+                        }
+                    },
+                })
+            ])
+
+            const totalPages = Math.ceil(totalRecords / limit);
+
+            return { data: loans, totalRecords, totalPages,  currentPage };
+
+        }catch (err){
+            throw new Error("Failed to fetch loans: " + (err as Error).message);
+        }
+    }
+
 
     async createLoan(userId: string, isbn: string, dueDate: Date){
         try {
@@ -36,7 +82,7 @@ class LoanService {
             //Is book taken by another customer?
            const isAvailable = await prisma.bookIsbn.findFirst({
                 where: {
-                    isbn: isbn,        
+                    isbn: {contains: isbn, mode: "insensitive"},        
                     loans: { none: { returnDate: null } },
                 }
             });
@@ -71,148 +117,163 @@ class LoanService {
         }
     }
 
-    async findLoan(query: string, page: number = 1,  sortBy: string = "createdAt", order: "asc" | "desc" = "desc") {
+    async findLoanSuccess(filters: any) {
         try {
-           const [books, totalRecords] = await Promise.all([ 
-                prisma.book.findMany({
+            const {currentPage, sortBy, order} = filters
+            const [loan, totalRecords] = await Promise.all([ 
+                prisma.loan.findMany({
                     where: {
-                        OR: [
-                        { title: { contains: query, mode: "insensitive" } },
-                        { author: { contains: query, mode: "insensitive" } },
-                        ],
-                    },
-                    skip: (page - 1) * limit,
-                    take: limit,
-                    orderBy: { [sortBy]: order },
-                    include: { bookIsbns: true },
-                }),
-                prisma.book.count({
-                        where: {
-                            OR: [
-                            { title: { contains: query, mode: "insensitive" } },
-                            { author: { contains: query, mode: "insensitive" } },
-                            ],
+                        user:{
+                            is: { isActive: true}
                         },
+                        statusId: 1,
+                    },
+                include: {user: true, bookIsbn: {include: {book: true}}},
+                skip: (currentPage - 1) * limit,
+                take: limit,
+                orderBy: { [sortBy]: order },
+                }),
+
+                prisma.loan.count({
+                    where: {
+                        user:{
+                            is: { isActive: true}
+                        },
+                        statusId: 1 
+                    },
                 })
             ])
 
 
             const totalPages = Math.ceil(totalRecords / limit);
 
-            return { data: books, totalRecords, totalPages,  page };
+            return { data: loan, totalRecords, totalPages,  currentPage };
 
         } catch (err) {
-            throw new Error("Failed to filter books: " + (err as Error).message);
+            throw new Error("Failed to filter Loans: " + (err as Error).message);
         }
     }
 
-    async findBookTitle(title: string, page: number = 1, sortBy: string = "title", order: "asc" | "desc" = "asc") {
+    async findLoanPending(filters: any) {
         try {
-           const [books, totalRecords] = await Promise.all([ 
-                prisma.book.findMany({
+            const {currentPage, sortBy, order} = filters
+            const [loan, totalRecords] = await Promise.all([ 
+                prisma.loan.findMany({
                     where: {
-                        title: {contains: title, mode: "insensitive"}
+                        user:{
+                            is: { isActive: true}
+                        },
+                        statusId: 2
                     },
-                    skip: (page - 1) * limit,
+                    include: {user: true, bookIsbn: {include: {book: true}}},
+                    skip: (currentPage - 1) * limit,
                     take: limit,
                     orderBy: { [sortBy]: order },
-                    include: { bookIsbns: true },
                 }),
-                prisma.book.count({
+
+                prisma.loan.count({
                     where: {
-                        title: {contains: title, mode: "insensitive"}
+                        user:{
+                            is: { isActive: true}
+                        },
+                        statusId: 2
                     },
                 })
             ])
 
-        const totalPages = Math.ceil(totalRecords / limit)
 
-        return { data: books, totalRecords, totalPages,  page };
+            const totalPages = Math.ceil(totalRecords / limit);
+
+            return { data: loan, totalRecords, totalPages,  currentPage };
 
         } catch (err) {
-            throw new Error("Failed to filter book titles: " + (err as Error).message);
+            throw new Error("Failed to filter Loans: " + (err as Error).message);
         }
     }
 
-    async findBookAuthor(author: string, page: number = 1, sortBy: string = "author", order: "asc" | "desc" = "asc") {
+    async findLoanFailed(filters: any) {
         try {
-           const [Authors, totalRecords] =  await Promise.all([ 
-                prisma.book.findMany({
+            const {currentPage, sortBy, order} = filters
+            const [loan, totalRecords] = await Promise.all([ 
+                prisma.loan.findMany({
                     where: {
-                        author: {contains: author, mode: "insensitive"}
+                        user:{
+                            is: { isActive: true}
+                        },
+                        statusId: 3
                     },
-                    skip: (page - 1) * limit,
+                    include: {user: true, bookIsbn: {include: {book: true}}},
+                    skip: (currentPage - 1) * limit,
                     take: limit,
                     orderBy: { [sortBy]: order },
-                    include: { bookIsbns: true },
                 }),
-                prisma.book.count({
+
+                prisma.loan.count({
                     where: {
-                        author: {contains: author, mode: "insensitive"}
+                        user:{
+                            is: { isActive: true}
+                        },
+                        statusId: 3
                     },
                 })
             ])
 
-        const totalPages = Math.ceil(totalRecords / limit)
 
-        return { data: Authors, totalRecords, totalPages,  page };
+            const totalPages = Math.ceil(totalRecords / limit);
+
+            return { data: loan, totalRecords, totalPages,  currentPage };
 
         } catch (err) {
-            throw new Error("Failed to filter book authors: " + (err as Error).message);
+            throw new Error("Failed to filter Loans: " + (err as Error).message);
         }
     }
 
-    async findByYear(year: number, page: number = 1, sortBy: string = "title", order: "asc" | "desc" = "asc") {
+   
+
+   
+
+    async updateLoan(id: string, returnDate: Date, isbnId: string,) {
         try {
-            const [Years, totalRecords] = await Promise.all([ 
-                prisma.book.findMany({
-                    where: { published_year: year },
-                    skip: (page - 1) * limit,
-                    take: limit,
-                    orderBy: { [sortBy]: order },
-                    include: { bookIsbns: true },
-                }),
-                prisma.book.count({
-                     where: { published_year: year },
-                })
-            ])
-
-            const totalPages = Math.ceil(totalRecords / limit)
-
-            return { data: Years, totalRecords, totalPages,  page };
-            
-        } catch (err) {
-            throw new Error("Failed to filter book years: " + (err as Error).message);
-        }
-    }
-
-    async updateOneBook(id: string, title: string, author: string, published_year: number, isbnId: string, newIsbn: string) {
-        try {
-            await prisma.book.update({
+            await prisma.loan.update({
             where: { id: id },
             data: {
-                title: title,
-                author: author,
-                published_year: published_year,
-                bookIsbns: {
-                    update: {
-                        where: { id: isbnId }, 
-                        data: { isbn: newIsbn },
-                    },
-                },
+                isbnId: isbnId,
+                returnDate: returnDate,
             }})
         } catch (err) {
-        throw new Error("Failed to update book: " + (err as Error).message);
+        throw new Error("Failed to update Loan: " + (err as Error).message);
         }
     }
 
-    async deleteOneBook(id: string) {
+    async deleteLoan(id: string) {
         try {
-            await prisma.book.delete({
+            await prisma.loan.update({
+                where: { id },
+                data: {isActive: false}
+            });
+        } catch (err) {
+            throw new Error("Failed to delete loan: " + (err as Error).message);
+        }
+    }
+
+    async restoreLoan(id: string) {
+        try {
+            await prisma.loan.update({
+                where: { id },
+                data: {isActive: true}
+            });
+        } catch (err) {
+            throw new Error("Failed to restore loan: " + (err as Error).message);
+        }
+    }
+
+    async permanentlyDeleteLoan(id: string) {
+        try {
+            await prisma.loan.delete({
                 where: { id },
             });
         } catch (err) {
-            throw new Error("Failed to delete book: " + (err as Error).message);
+            throw new Error("Failed to delete loan: " + (err as Error).message);
         }
     }
 
