@@ -1,5 +1,6 @@
 import prisma from "../src/database/model";
 import bcrypt from "bcrypt";
+import { books } from "./booksTemplate";
 
 async function main() {
     await prisma.roles.createMany({
@@ -120,6 +121,10 @@ async function main() {
         ],
         skipDuplicates: true,
   })
+
+  for (const book of books) {
+    await prisma.book.create({ data: book });
+  }
 
   console.log("Seeding completed successfully")
 

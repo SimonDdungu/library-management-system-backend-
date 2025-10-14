@@ -12,9 +12,10 @@ const router = express.Router()
 router.get("/", verifyToken, async (req: Request, res: Response) => {
     try {
         const data: any = await controllers.books.getAllBooks(req)
-        authorized(isStaff)(req, res, () => {
-            sendSuccessMessage(res, data)
-        });
+        // authorized(isStaff)(req, res, () => {
+        //     sendSuccessMessage(res, data)
+        // });
+        sendSuccessMessage(res, data)
     } catch (error: unknown) {
         handleErrorResponse(res, 500, error)
     }

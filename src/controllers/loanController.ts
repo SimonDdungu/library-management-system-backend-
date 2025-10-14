@@ -34,15 +34,17 @@ class LoanController {
             if(payload.error == null){
                 const {userId, isbn, dueDate} = payload
 
-                const User_exists = await services.users.findUser(userId)
-                const Book_exists = await services.books.findByISBN(isbn)
+                const User_exists = await services.users.exists(userId)
+                const is_BookAvailable = await services.loans.isAvailable(isbn)
+                
 
                 if(!User_exists){
                     return res.status(404).json({ message: "User doesn't exist"})
-                }else if(!Book_exists) {
-                    return res.status(404).json({ message: "Book with ISBN not found"})
+                }else if(!is_BookAvailable) {
+                    return res.status(404).json({ message: "Book not available"})
                 }else{
-                   return await services.loans.createLoan(userId, isbn, dueDate)
+                    const bookDetails = await services.books.BookDetails(is_BookAvailable.id)
+                   return await services.loans.createLoan(userId, isbn, bookDetails, dueDate)
                 }
             }
         }catch(error){
@@ -65,110 +67,77 @@ class LoanController {
             let currentPage = Number(page)
             
 
-            return await services.books.findBooks(query, {currentPage, sortedBy, order})
+            return await services.loans.findLoan(query, {currentPage, sortedBy, order})
             
         } catch (error) {
             throw error
         }
     }
 
-    async findBookTitle(req: Request){
+    async findLoanSuccess(req: Request){
         try {
-            const schema = Joi.object({
-            title: Joi.string().required()
-            })
 
-            
-            const payload = await schema.validateAsync(req.query)
-
-            const {title} = payload
-            //const {page = 1, sortedBy = "title", order = "asc"} = filters || {}
-            const {page = "1", sortedBy = "title", order = "asc"} = req.query as searchFilters
+            //const {page = 1, sortedBy = "createdAt", order = "desc"} = filters || {}
+            const {page = "1", sortedBy = "createdAt", order = "desc"} = req.query as searchFilters
 
             let currentPage = Number(page)
+            
 
-
-            return await services.books.findBookTitle(title, {currentPage, sortedBy, order})
+            return await services.loans.findLoanSuccess({currentPage, sortedBy, order})
             
         } catch (error) {
             throw error
         }
     }
 
-    async findBookAuthor(req: Request){
+    async findLoanPending(req: Request){
         try {
-            const schema = Joi.object({
-            author: Joi.string().required()
-            })
 
-            const payload = await schema.validateAsync(req.query)
-
-            const {author} = payload
-            //const {page = 1, sortedBy = "author", order = "asc"} = filters || {}
-            const {page = "1", sortedBy = "author", order = "asc"} = req.query as searchFilters
+            //const {page = 1, sortedBy = "createdAt", order = "desc"} = filters || {}
+            const {page = "1", sortedBy = "createdAt", order = "desc"} = req.query as searchFilters
 
             let currentPage = Number(page)
+            
 
-            return await services.books.findBookAuthor(author, {currentPage, sortedBy, order})
+            return await services.loans.findLoanPending({currentPage, sortedBy, order})
             
         } catch (error) {
             throw error
         }
     }
 
-    async findByYear(req: Request){
+    async findLoanFailed(req: Request){
         try {
-            const schema = Joi.object({
-            Year: Joi.number().integer().required().max(4)
-            })
-
-            const {year} = req.query
-            let SearchedYear = Number(year)
-
-
-            const payload = await schema.validateAsync(SearchedYear)
-
-            const {Year} = payload
-            //const {page = 1, sortedBy = "year", order = "desc"} = filters || {}
-            const {page = "1", sortedBy = "year", order = "desc"} = req.query as searchFilters
+            
+            //const {page = 1, sortedBy = "createdAt", order = "desc"} = filters || {}
+            const {page = "1", sortedBy = "createdAt", order = "desc"} = req.query as searchFilters
 
             let currentPage = Number(page)
+            
 
-            return await services.books.findByYear(Year, {currentPage, sortedBy, order})
+            return await services.loans.findLoanFailed({currentPage, sortedBy, order})
             
         } catch (error) {
             throw error
         }
     }
 
-    async findByISBN(req: Request){
+    async findLoanDeleted(req: Request){
         try {
             const schema = Joi.object({
-            isbn: Joi.string().required()
+            query: Joi.string().required()
             })
 
             const payload = await schema.validateAsync(req.query)
 
-            const {isbn} = payload
-    
-            return await services.books.findByISBN(isbn)
+            const {query} = payload
+            //const {page = 1, sortedBy = "createdAt", order = "desc"} = filters || {}
+            const {page = "1", sortedBy = "createdAt", order = "desc"} = req.query as searchFilters
+
+            let currentPage = Number(page)
             
-        } catch (error) {
-            throw error
-        }
-    }
 
-    async findById(req: Request){
-        try {
-            const schema = Joi.object({
-            id: Joi.string().required()
-            })
-
-            const payload = await schema.validateAsync(req.params)
-
-            const {id} = payload
-    
-            return await services.books.findById(id)
+            return await services.loans.findDeletedLoan(query, {currentPage, sortedBy, order})
             
         } catch (error) {
             throw error
@@ -176,39 +145,40 @@ class LoanController {
     }
 
     
-    async updateOneBook(req: Request, res: Response){
+    async updateLoan(req: Request, res: Response){
         try {
             const schema = Joi.object({
                 id: Joi.string().required(),
-                title: Joi.string().required(),
-                author: Joi.string().required(),
-                publish_year: Joi.number().integer().required().max(4),
-                isbn_id: Joi.string().required(),
-                new_isbn: Joi.string().required(),
+                isbn: Joi.string().required(),
+                returnDate: Joi.date().iso()
             })
 
             const payload = await schema.validateAsync(req.body)
 
             if(payload.error == null){
-                const {id, title, author, publish_year, isbn_id, new_isbn} = payload
-                const Title = _.startCase(title)
-                const Author = _.startCase(author)
+                const {id, isbn, returnDate} = payload
 
-                const exists = await services.books.findByISBN(new_isbn)
-
-                if(exists){
-                    return res.status(409).json({ message: "Book with ISBN already exists"})
+                const is_BookAvailable = await services.loans.isAvailable(isbn)
+                
+                if(!is_BookAvailable) {
+                    return res.status(404).json({ message: "Book not available"})
                 }else{
-                    return await services.books.updateOneBook(id, Title, Author, publish_year, isbn_id, new_isbn)
+                    const bookDetails = await services.books.BookDetails(is_BookAvailable.id)
+                    const isbnId = bookDetails?.id
+                    if(isbnId){
+                        return await services.loans.updateLoan(id, isbnId, returnDate)
+                    }else{
+                        res.status(500).json({message: "Could not update Loan"})
+                    }
                 }
-            } 
-        } catch (error) {
+            }
+        }catch (error) {
             throw error
         }
     }
 
 
-    async deleteOneBook(req: Request){
+    async deleteOneLoan(req: Request){
         try {
             const schema = Joi.object({
             id: Joi.string().required()
@@ -218,29 +188,30 @@ class LoanController {
 
             const {id} = payload
     
-            return await services.books.deleteOneBook(id)
+            return await services.loans.deleteLoan(id)
 
         } catch (error) {
             throw error
         }
     }
 
-    async deleteManyBooks(req: Request){
+    async permanentlyDeleteOneLoan(req: Request){
         try {
             const schema = Joi.object({
-            id: Joi.array().items(Joi.string())
+            id: Joi.string().required()
             })
 
-            const payload = await schema.validateAsync(req.body)
+            const payload = await schema.validateAsync(req.params)
 
             const {id} = payload
     
-            return await services.books.deleteManyBooks(id)
+            return await services.loans.permanentlyDeleteLoan(id)
 
         } catch (error) {
             throw error
         }
     }
+
 }
 
 export { LoanController }

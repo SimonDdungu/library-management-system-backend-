@@ -37,74 +37,24 @@ class LoanService {
         }
     }
 
-    async getAllDeletedLoans(filters: any){
-        try{
-            const {currentPage, sortBy, order} = filters
-            const [loans, totalRecords] = await Promise.all([ 
-                prisma.loan.findMany({
-                    where: {
-                        user: {
-                            is: {isActive: false}
-                        }
-                    },
-                    include: {user: true, bookIsbn: {include: {book: true}}},
-                    skip: (currentPage - 1) * limit,
-                    take: limit,
-                    orderBy: { [sortBy] : order },
-                }),
-                prisma.loan.count({
-                    where: {
-                        user: {
-                            is: {isActive: false}
-                        }
-                    },
-                })
-            ])
-
-            const totalPages = Math.ceil(totalRecords / limit);
-
-            return { data: loans, totalRecords, totalPages,  currentPage };
-
-        }catch (err){
-            throw new Error("Failed to fetch loans: " + (err as Error).message);
-        }
-    }
 
 
-    async createLoan(userId: string, isbn: string, dueDate: Date){
+    async createLoan(userId: string, isbnId: string, bookDetails: any, dueDate: Date){
         try {
             //Does User exist?
-            const user = await prisma.user.findUnique({ where: { id: userId } });
-            if (!user || !user.isActive) {
-            throw new Error("User does not exist");
-            }
+            
 
             //Is book taken by another customer?
-           const isAvailable = await prisma.bookIsbn.findFirst({
-                where: {
-                    isbn: {contains: isbn, mode: "insensitive"},        
-                    loans: { none: { returnDate: null } },
-                }
-            });
-            if (!isAvailable) {
-                throw new Error("This book is not available.");
-            }
+           
 
-            const bookDetails = await prisma.bookIsbn.findUnique({
-                where: { id: isAvailable.id },
-                include: { book: true },
-            });
-            if (!bookDetails) {
-                throw new Error("Book details not found");
-            }
-
+            //  book details
 
 
             return await prisma.loan.create({
                 data: 
                 {
                     userId: userId, 
-                    isbnId: bookDetails.id, 
+                    isbnId: isbnId, 
                     dueDate: dueDate, 
                     bookTitle: bookDetails.book.title,
                     bookAuthor: bookDetails.book.author,
@@ -114,6 +64,109 @@ class LoanService {
 
         } catch (err) {
             throw new Error("Failed to create loan: " + (err as Error).message)
+        }
+    }
+
+    async findLoan(query: string, filters: any) {
+        try {
+            const {currentPage, sortBy, order} = filters
+            const [loan, totalRecords] = await Promise.all([ 
+                prisma.loan.findMany({
+                    where: {
+                        user:{
+                            is: { isActive: true, name: {contains: query, mode: "insensitive"}},
+                        },
+                    },
+                include: {user: true, bookIsbn: {include: {book: true}}},
+                skip: (currentPage - 1) * limit,
+                take: limit,
+                orderBy: { [sortBy]: order },
+                }),
+
+                prisma.loan.count({
+                    where: {
+                        user:{
+                            is: { isActive: true,  name: {contains: query, mode: "insensitive"}}
+                        },
+                    },
+                })
+            ])
+
+
+            const totalPages = Math.ceil(totalRecords / limit);
+
+            return { data: loan, totalRecords, totalPages,  currentPage };
+
+        } catch (err) {
+            throw new Error("Failed to filter Loans: " + (err as Error).message);
+        }
+    }
+
+    async getAllDeletedLoans(filters: any) {
+        try {
+            const {currentPage, sortBy, order} = filters
+            const [loan, totalRecords] = await Promise.all([ 
+                prisma.loan.findMany({
+                    where: {
+                        isActive: false,
+                    },
+                include: {user: true, bookIsbn: {include: {book: true}}},
+                skip: (currentPage - 1) * limit,
+                take: limit,
+                orderBy: { [sortBy]: order },
+                }),
+
+                prisma.loan.count({
+                    where: {
+                        isActive: false
+                    },
+                })
+            ])
+
+
+            const totalPages = Math.ceil(totalRecords / limit);
+
+            return { data: loan, totalRecords, totalPages,  currentPage };
+
+        } catch (err) {
+            throw new Error("Failed to filter Loans: " + (err as Error).message);
+        }
+    }
+
+    async findDeletedLoan(query: string, filters: any) {
+        try {
+            const {currentPage, sortBy, order} = filters
+            const [loan, totalRecords] = await Promise.all([ 
+                prisma.loan.findMany({
+                    where: {
+                        isActive: false,
+                        user:{
+                            is: { isActive: true, name: {contains: query, mode: "insensitive"}},
+                        },
+                    },
+                include: {user: true, bookIsbn: {include: {book: true}}},
+                skip: (currentPage - 1) * limit,
+                take: limit,
+                orderBy: { [sortBy]: order },
+                }),
+
+                prisma.loan.count({
+                    where: {
+                        isActive: false,
+                        user:{
+                            is: { isActive: true,  name: {contains: query, mode: "insensitive"}}
+                        },
+                    },
+                })
+            ])
+
+
+            const totalPages = Math.ceil(totalRecords / limit);
+
+            return { data: loan, totalRecords, totalPages,  currentPage };
+
+        } catch (err) {
+            throw new Error("Failed to filter Loans: " + (err as Error).message);
         }
     }
 
@@ -230,11 +283,23 @@ class LoanService {
 
    
 
-   
-
-    async updateLoan(id: string, returnDate: Date, isbnId: string,) {
+   async isAvailable(isbn: string,){
         try {
-            await prisma.loan.update({
+            return await prisma.bookIsbn.findFirst({
+                where: {
+                    isbn: {contains: isbn, mode: "insensitive"},        
+                    loans: { none: { returnDate: null } },
+                },
+                include: {book: true}
+            });
+        } catch (error) {
+            throw new Error("Something went wrong")
+        }
+    }
+
+    async updateLoan(id: string, isbnId: string, returnDate: Date,) {
+        try {
+            return await prisma.loan.update({
             where: { id: id },
             data: {
                 isbnId: isbnId,

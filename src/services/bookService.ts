@@ -228,6 +228,17 @@ class BookService{
         }
     }
 
+    async BookDetails(isbnId: string){
+        try {
+            return await prisma.bookIsbn.findUnique({
+                where: { id: isbnId },
+                include: { book: true },
+            });
+        } catch (error) {
+            throw new Error("Something went wrong")
+        }
+    }
+
     async updateOneBook(id: string, title: string, author: string, published_year: number, isbnId: string, newIsbn: string) {
         try {
             if(!id || !title || !author || !published_year || !isbnId || !newIsbn){

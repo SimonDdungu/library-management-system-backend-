@@ -34,6 +34,14 @@ class UserService{
         }
     }
 
+    async exists(userId: string){
+        try {
+            return await prisma.user.findUnique({ where: { id: userId } });      
+        } catch (error) {
+            throw new Error("SOmething went wrong with user exists")
+        }
+    }
+
     async findUser(id: string) {
         try {
             return await prisma.user.findUnique({
