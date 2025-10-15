@@ -297,6 +297,15 @@ class LoanService {
         }
     }
 
+
+    async booksOnLoan(){
+        return await prisma.loan.count({
+            where: {
+                returnDate: null
+            }
+        })
+    }
+
     async updateLoan(id: string, isbnId: string, returnDate: Date,) {
         try {
             return await prisma.loan.update({

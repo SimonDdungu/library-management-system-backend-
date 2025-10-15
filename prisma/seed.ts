@@ -3,6 +3,23 @@ import bcrypt from "bcrypt";
 import { books } from "./booksTemplate";
 
 async function main() {
+
+    await prisma.admin.deleteMany({})
+    await prisma.$executeRaw`TRUNCATE TABLE "Roles" RESTART IDENTITY CASCADE;`
+    await prisma.roles.deleteMany({})
+    await prisma.position.deleteMany({})
+    await prisma.status.deleteMany({})
+    await prisma.bookIsbn.deleteMany({})
+    await prisma.book.deleteMany({})
+
+    await prisma.status.createMany({
+        data: [
+            { status: "Returned" },
+            { status: "Pending" },
+            { status: "Lost" },
+        ]
+    })
+
     await prisma.roles.createMany({
         data: [
             { name: 'SUPER_ADMIN' },
