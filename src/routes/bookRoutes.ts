@@ -9,7 +9,7 @@ import { isStaff, isAdmin, isLibrarian, isSuperAdmin } from "../middleware/auth"
 
 const router = express.Router()
 
-router.get("/", verifyToken, async (req: Request, res: Response) => {
+router.get("/",  async (req: Request, res: Response) => {
     try {
         const data: any = await controllers.books.getAllBooks(req)
         // authorized(isStaff)(req, res, () => {

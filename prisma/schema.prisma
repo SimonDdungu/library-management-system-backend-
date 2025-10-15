@@ -1,12 +1,11 @@
 generator client {
   provider = "prisma-client-js"
-  output   = "./database/models"
   binaryTargets = ["native", "linux-musl"]
 }
 
 datasource db {
   provider = "postgresql"
-  url      = env("DATABASE_URL")
+  url      = env("HOST_DATABASE_URL")
 }
 
 model Book {

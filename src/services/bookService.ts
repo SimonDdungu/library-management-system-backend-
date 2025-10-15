@@ -1,22 +1,24 @@
 import prisma from "../database/model"
 
-const limit = 20
+const limit = 10
 
 
 class BookService{
    
     async getAllBooks(filters: any){
         try{
-            const {currentPage, sortBy, order} = filters
+            const {currentPage, sortedBy, order} = filters
             const [books, totalRecords] = await Promise.all([ 
                 prisma.book.findMany({
                     skip: (currentPage - 1) * limit,
                     take: limit,
-                    orderBy: { [sortBy] : order },
+                    orderBy: { [sortedBy] : order },
                     include: { bookIsbn: true },
                 }),
                 prisma.book.count()
             ])
+
+            
 
             if(!books){
                 throw new Error("There are no books yet.")

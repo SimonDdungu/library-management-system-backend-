@@ -17,6 +17,7 @@ class BookController {
 
             return await services.books.getAllBooks({currentPage, sortedBy, order})
         } catch (error) {
+            console.log(error)
             throw error
         }
     }

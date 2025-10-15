@@ -1,4 +1,4 @@
-import { PrismaClient } from "../../prisma/database/models"; // matches your output folder
+import { PrismaClient } from "@prisma/client"; // matches your output folder
 
 const prisma = new PrismaClient();
 
