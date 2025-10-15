@@ -26,7 +26,7 @@ class BookService{
 
             const totalPages = Math.ceil(totalRecords / limit);
 
-            return { data: books, totalRecords, totalPages,  currentPage };
+            return { books, totalRecords, totalPages,  currentPage };
 
         }catch (err){
             throw new Error("Failed to fetch books: " + (err as Error).message);
@@ -78,7 +78,7 @@ class BookService{
 
             const totalPages = Math.ceil(totalRecords / limit);
 
-            return { data: books, totalRecords, totalPages,  currentPage };
+            return { books, totalRecords, totalPages,  currentPage };
 
         } catch (err) {
             throw new Error("Failed to filter books: " + (err as Error).message);
@@ -111,7 +111,7 @@ class BookService{
 
         const totalPages = Math.ceil(totalRecords / limit)
 
-        return { data: books, totalRecords, totalPages,  currentPage };
+        return { books, totalRecords, totalPages,  currentPage };
 
         } catch (err) {
             throw new Error("Failed to filter book titles: " + (err as Error).message);
@@ -144,7 +144,7 @@ class BookService{
 
         const totalPages = Math.ceil(totalRecords / limit)
 
-        return { data: Authors, totalRecords, totalPages,  page };
+        return { Authors, totalRecords, totalPages,  page };
 
         } catch (err) {
             throw new Error("Failed to filter book authors: " + (err as Error).message);
@@ -173,7 +173,7 @@ class BookService{
 
             const totalPages = Math.ceil(totalRecords / limit)
 
-            return { data: Years, totalRecords, totalPages,  currentPage };
+            return {Years, totalRecords, totalPages,  currentPage };
             
         } catch (err) {
             throw new Error("Failed to filter book years: " + (err as Error).message);
@@ -190,7 +190,7 @@ class BookService{
                 throw new Error("Book by that ISBN could not be found.")
             }
 
-            return { data: ISBN};
+            return {ISBN};
             
         } catch (err) {
             throw new Error("Failed to find the book isbn: " + (err as Error).message);
@@ -206,7 +206,7 @@ class BookService{
                 throw new Error("Book could not be found.")
             }
 
-            return {data: isbn}
+            return {isbn}
         } catch (err) {
             
         }
@@ -223,7 +223,7 @@ class BookService{
                 throw new Error("Book by that ID could not be found.")
             }
 
-            return { data: book};
+            return { book};
             
         } catch (err) {
             throw new Error("Failed to find the book isbn: " + (err as Error).message);
