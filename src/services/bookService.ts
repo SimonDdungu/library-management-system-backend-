@@ -8,14 +8,15 @@ class BookService{
     async getAllBooks(filters: any){
         try{
             const {currentPage, sortedBy, order} = filters
-            const [books, totalRecords] = await Promise.all([ 
+            const [books, totalRecords, totalCopies] = await Promise.all([ 
                 prisma.book.findMany({
                     skip: (currentPage - 1) * limit,
                     take: limit,
                     orderBy: { [sortedBy] : order },
                     include: { bookIsbn: true },
                 }),
-                prisma.book.count()
+                prisma.book.count(),
+                prisma.bookIsbn.count()
             ])
 
             
@@ -26,7 +27,7 @@ class BookService{
 
             const totalPages = Math.ceil(totalRecords / limit);
 
-            return { books, totalRecords, totalPages,  currentPage };
+            return { books, totalRecords, totalPages,  currentPage, totalCopies };
 
         }catch (err){
             throw new Error("Failed to fetch books: " + (err as Error).message);
