@@ -79,8 +79,12 @@ class BookController {
             title: Joi.string().required()
             })
 
+            const validationOptions = {
+                allowUnknown: true
+            };
+
             
-            const payload = await schema.validateAsync(req.query)
+            const payload = await schema.validateAsync(req.query, validationOptions)
 
             const {title} = payload
             //const {page = 1, sortedBy = "title", order = "asc"} = filters || {}
@@ -101,8 +105,13 @@ class BookController {
             const schema = Joi.object({
             author: Joi.string().required()
             })
+            
+            const validationOptions = {
+               allowUnknown: true
+            };
 
-            const payload = await schema.validateAsync(req.query)
+            const payload = await schema.validateAsync(req.query, validationOptions)
+
 
             const {author} = payload
             //const {page = 1, sortedBy = "author", order = "asc"} = filters || {}
@@ -126,8 +135,7 @@ class BookController {
             const {year} = req.query
             let SearchedYear = Number(year)
 
-
-            const payload = await schema.validateAsync({ Year: SearchedYear })
+            const payload = await schema.validateAsync({ Year: SearchedYear }, {allowUnknown: true})
 
             const {Year} = payload
             //const {page = 1, sortedBy = "year", order = "desc"} = filters || {}
