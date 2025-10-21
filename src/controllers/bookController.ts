@@ -120,18 +120,18 @@ class BookController {
     async findByYear(req: Request){
         try {
             const schema = Joi.object({
-            Year: Joi.number().integer().required().max(4)
+            Year: Joi.number().integer().required().max(9999)
             })
 
             const {year} = req.query
             let SearchedYear = Number(year)
 
 
-            const payload = await schema.validateAsync(SearchedYear)
+            const payload = await schema.validateAsync({ Year: SearchedYear })
 
             const {Year} = payload
             //const {page = 1, sortedBy = "year", order = "desc"} = filters || {}
-            const {page = "1", sortedBy = "year", order = "desc"} = req.query as searchFilters
+            const {page = "1", sortedBy = "published_year", order = "desc"} = req.query as searchFilters
 
             let currentPage = Number(page)
 

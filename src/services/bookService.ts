@@ -48,7 +48,7 @@ class BookService{
 
     async findBooks(query: string, filters: any) {
         try {
-            const{currentPage,  sortBy, order} = filters
+            const{currentPage,  sortedBy, order} = filters
             const [books, totalRecords] = await Promise.all([ 
                 prisma.book.findMany({
                     where: {
@@ -59,7 +59,7 @@ class BookService{
                     },
                     skip: (currentPage - 1) * limit,
                     take: limit,
-                    orderBy: { [sortBy]: order },
+                    orderBy: { [sortedBy]: order },
                     include: { bookIsbn: true },
                 }),
                 prisma.book.count({
@@ -88,7 +88,7 @@ class BookService{
 
     async findBookTitle(title: string, filters: any) {
         try {
-            const{currentPage,  sortBy, order} = filters
+            const{currentPage,  sortedBy, order} = filters
             const [books, totalRecords] = await Promise.all([ 
                 prisma.book.findMany({
                     where: {
@@ -96,7 +96,7 @@ class BookService{
                     },
                     skip: (currentPage - 1) * limit,
                     take: limit,
-                    orderBy: { [sortBy]: order },
+                    orderBy: { [sortedBy]: order },
                     include: { bookIsbn: true },
                 }),
                 prisma.book.count({
@@ -121,15 +121,15 @@ class BookService{
 
     async findBookAuthor(author: string, filters: any) {
         try {
-            const{page,  sortBy, order} = filters
+            const{currentPage,  sortedBy, order} = filters
             const [Authors, totalRecords] =  await Promise.all([ 
                 prisma.book.findMany({
                     where: {
                         author: {contains: author, mode: "insensitive"}
                     },
-                    skip: (page - 1) * limit,
+                    skip: (currentPage - 1) * limit,
                     take: limit,
-                    orderBy: { [sortBy]: order },
+                    orderBy: { [sortedBy]: order },
                     include: { bookIsbn: true },
                 }),
                 prisma.book.count({
@@ -145,7 +145,7 @@ class BookService{
 
         const totalPages = Math.ceil(totalRecords / limit)
 
-        return { Authors, totalRecords, totalPages,  page };
+        return { Authors, totalRecords, totalPages,  currentPage };
 
         } catch (err) {
             throw new Error("Failed to filter book authors: " + (err as Error).message);
@@ -154,13 +154,13 @@ class BookService{
 
     async findByYear(year: number, filters: any) {
         try {
-            const{currentPage,  sortBy, order} = filters
+            const{currentPage,  sortedBy, order} = filters
             const [Years, totalRecords] = await Promise.all([ 
                 prisma.book.findMany({
                     where: { published_year: year },
                     skip: (currentPage - 1) * limit,
                     take: limit,
-                    orderBy: { [sortBy]: order },
+                    orderBy: { [sortedBy]: order },
                     include: { bookIsbn: true },
                 }),
                 prisma.book.count({
