@@ -21,6 +21,7 @@ const handleErrorResponse = (res: Response, status: number, error: any, message?
         message: message || "Internal Server Error",
         error: errorMessage,
     }
+    console.log("ERROR: ", errorMessage)
     res.status(response.statusCode).send(response);
 }
 

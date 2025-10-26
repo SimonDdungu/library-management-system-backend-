@@ -82,10 +82,10 @@ router.get("/search/:id", async (req: Request, res: Response) => {
 
 router.post("/create/", async (req: Request, res: Response) => {
     try {
-        const data: any = await controllers.books.createBook(req, res)
+        const data: any = await controllers.books.createBook(req)
         sendSuccessMessage(res, data)
-    } catch (error: unknown) {
-        handleErrorResponse(res, 500, error)
+    } catch (error: any) {
+        handleErrorResponse(res, error.statusCode || 500, error)
     }
 })
 

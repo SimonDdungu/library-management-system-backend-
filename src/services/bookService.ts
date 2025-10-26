@@ -183,16 +183,10 @@ class BookService{
 
     async findByISBN(isbn: string) {
         try {
-            const ISBN = await prisma.bookIsbn.findFirst({
+            return await prisma.bookIsbn.findFirst({
                     where: { isbn: {contains: isbn, mode: "insensitive"} },
                     include: { book: true },
                 })
-            if(!ISBN){
-                throw new Error("Book by that ISBN could not be found.")
-            }
-
-            return {ISBN};
-            
         } catch (err) {
             throw new Error("Failed to find the book isbn: " + (err as Error).message);
         }

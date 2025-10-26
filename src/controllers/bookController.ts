@@ -22,16 +22,20 @@ class BookController {
         }
     }
 
-    async createBook(req: Request, res: Response){
+    async createBook(req: Request){
         try{
             const schema = Joi.object({
                 title: Joi.string().required(),
                 author: Joi.string().required(),
-                publish_year: Joi.number().integer().required().max(4),
+                publish_year: Joi.number().integer().required().max(9999),
                 isbn: Joi.string().required()
             })
 
+            
+
             const payload = await schema.validateAsync(req.body)
+
+            console.log("Received data: ", payload)
 
             if(payload.error == null){
                 const {title, author, publish_year, isbn} = payload
@@ -41,7 +45,7 @@ class BookController {
                 const exists = await services.books.findByISBN(isbn)
 
                 if(exists){
-                    return res.status(409).json({ message: "Book with ISBN already exists"})
+                    throw Object.assign(new Error("Book with ISBN already exists"), { statusCode: 409 });
                 }else{
                     return await services.books.createBook(Title, Author, publish_year, isbn)
                 }
